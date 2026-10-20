@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-aurora">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>RecallPro 6.0 — Advanced Exam & StudySmarter Suite</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="RecallPro" />
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135755.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    button { touch-action: manipulation; cursor: pointer; user-select: none; }
+
+    html.theme-aurora {
+      --bg-main: radial-gradient(circle at 15% 10%, #1e1b4b 0%, #090d16 55%, #0f172a 100%);
+      --bg-panel: rgba(15, 23, 42, 0.82); --bg-sub: rgba(2, 6, 23, 0.65); --bg-muted: rgba(30, 41, 59, 0.88);
+      --border-col: rgba(99, 102, 241, 0.24); --text-main: #f8fafc; --text-sub: #94a3b8; --accent: #6366f1;
+      --card-front: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); --card-back: linear-gradient(145deg, #1e1b4b 0%, #0f172a 100%);
+    }
+    html.theme-matcha {
+      --bg-main: linear-gradient(135deg, #f4efe6 0%, #e9e2d0 100%);
+      --bg-panel: rgba(253, 251, 247, 0.94); --bg-sub: #f3ede0; --bg-muted: #e5dec9;
+      --border-col: rgba(74, 107, 83, 0.25); --text-main: #2c2520; --text-sub: #6e6259; --accent: #4a6b53;
+      --card-front: linear-gradient(145deg, #fffdf9 0%, #f5efe2 100%); --card-back: linear-gradient(145deg, #edf3ee 0%, #e4ede6 100%);
+    }
+    html.theme-rose {
+      --bg-main: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 100%);
+      --bg-panel: rgba(255, 255, 255, 0.9); --bg-sub: #fce7f3; --bg-muted: #f5d0fe;
+      --border-col: rgba(219, 39, 119, 0.22); --text-main: #3b0764; --text-sub: #7e22ce; --accent: #db2777;
+      --card-front: linear-gradient(145deg, #ffffff 0%, #fdf2f8 100%); --card-back: linear-gradient(145deg, #faf5ff 0%, #fce7f3 100%);
+    }
+    html.theme-daylight {
+      --bg-main: linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
+      --bg-panel: rgba(255, 255, 255, 0.96); --bg-sub: #f1f5f9; --bg-muted: #e2e8f0;
+      --border-col: #cbd5e1; --text-main: #0f172a; --text-sub: #475569; --accent: #4f46e5;
+      --card-front: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); --card-back: linear-gradient(145deg, #eef2ff 0%, #ffffff 100%);
+    }
+
+    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    .panel-glass { background: var(--bg-panel); border: 1px solid var(--border-col); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .sub-glass { background: var(--bg-sub); border: 1px solid var(--border-col); }
+    .btn-soft { background: var(--bg-muted); color: var(--text-main); border: 1px solid var(--border-col); }
+    .text-main { color: var(--text-main); }
+    .text-sub { color: var(--text-sub); }
+    .btn-accent { background: var(--accent); color: #ffffff !important; }
+
+    .deck-stack-wrap { position: relative; padding-bottom: 14px; }
+    .deck-stack-wrap::before, .deck-stack-wrap::after {
+      content: ''; position: absolute; left: 18px; right: 18px; height: 100%;
+      border-radius: 1.5rem; background: var(--bg-panel); border: 1px solid var(--border-col); pointer-events: none;
+    }
+    .deck-stack-wrap::before { bottom: 6px; transform: scale(0.97); opacity: 0.65; z-index: 0; }
+    .deck-stack-wrap::after  { bottom: 0px; transform: scale(0.94); opacity: 0.35; z-index: 0; }
+
+    /* 2-STAGE NON-INVERTING IPAD FLIP ENGINE */
+    .card-stage {
+      position: relative; z-index: 2; width: 100%; height: 100%;
+      transition: transform 0.14s ease-in-out, opacity 0.14s ease-in-out;
+      transform: perspective(1200px) rotateY(0deg) scale(1);
+    }
+    .card-stage.flip-fold {
+      transform: perspective(1200px) rotateY(88deg) scale(0.96);
+      opacity: 0.35;
+    }
+    .card-face-box {
+      position: relative; width: 100%; height: 100%;
+      border-radius: 1.5rem; border: 1.5px solid var(--border-col);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.42); overflow: hidden;
+    }
+    .card-front-bg { background: var(--card-front); }
+    .card-back-bg  { background: var(--card-back); }
+
+    .bg-img-layer { position: absolute; inset: 0; z-index: 0; background-position: center; background-repeat: no-repeat; transition: filter 0.25s; }
+    .bg-img-blur-backdrop { position: absolute; inset: -15px; z-index: 0; background-position: center; background-size: cover; filter: blur(18px) brightness(0.55); }
+    .bg-scrim { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(2,6,23,0.55) 0%, rgba(2,6,23,0.32) 50%, rgba(2,6,23,0.74) 100%); }
+    .card-content-layer { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+
+    .has-bg-image .glass-capsule {
+      background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.24); color: #ffffff !important;
+      padding: 14px 20px; border-radius: 1.25rem; box-shadow: 0 12px 30px rgba(0,0,0,0.48);
+    }
+    .has-bg-image .glass-capsule p { color: #ffffff !important; text-shadow: 0 1px 3px rgba(0,0,0,0.65); }
+    .peek-active .glass-capsule, .peek-active .bg-scrim, .peek-active .card-bottom-bar { opacity: 0 !important; pointer-events: none; }
+
+    .cloze-pill {
+      display: inline-block; padding: 0 6px; border-radius: 6px;
+      background: rgba(99, 102, 241, 0.28); border: 1px dashed #818cf8; color: transparent; cursor: pointer; user-select: none;
+    }
+    .cloze-pill.revealed { color: inherit !important; background: rgba(16, 185, 129, 0.2); border-style: solid; border-color: #10b981; }
+    .cover-answers .sheet-ans { filter: blur(6px); cursor: pointer; user-select: none; }
+    .cover-answers .sheet-ans.revealed { filter: none !important; }
+    .match-tile.matched { opacity: 0; transform: scale(0.85); pointer-events: none; transition: all 0.22s; }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- TOP BAR -->
+  <header class="sticky top-0 z-30 panel-glass border-b px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="toggleMobileSidebar()" class="lg:hidden px-3 py-2 rounded-xl btn-soft text-xs font-bold flex items-center gap-1.5">
+        <span>📁</span> <span>Folders</span>
+      </button>
+      <div class="w-9 h-9 rounded-2xl btn-accent flex items-center justify-center font-extrabold text-sm shadow-md">R</div>
+      <div class="hidden sm:block">
+        <span class="font-extrabold text-base tracking-tight text-main">RecallPro</span>
+        <span id="appReadyBadge" class="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">✓ v6.0 Active</span>
+      </div>
+    </div>
+
+    <button type="button" onclick="openModal('yptModal')" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-500 text-xs font-extrabold">
+      <span>🔥 YPT:</span> <span id="yptSessionSummary">0 Cards · 0 MCQs</span>
+    </button>
+
+    <div class="flex-1 max-w-xs mx-1">
+      <input id="cardSearchInput" type="text" placeholder="🔍 Search words, tags, hooks..." class="w-full sub-glass rounded-xl px-3.5 py-2 text-xs sm:text-sm text-main outline-none" />
+    </div>
+
+    <div class="flex items-center gap-1.5">
+      <button type="button" onclick="cycleTheme()" id="themeToggleBtn" class="px-2.5 py-2 rounded-xl btn-soft text-xs font-bold">🌌 Aurora</button>
+      <button type="button" onclick="openModal('aiModal')" class="px-2.5 py-2 rounded-xl bg-violet-500/20 text-violet-400 border border-violet-500/30 text-xs font-bold">✨ AI Key</button>
+      <button type="button" onclick="openAiGenModal(activeFolderId)" class="px-2.5 py-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white text-xs font-extrabold shadow-md">✨ AI Make</button>
+      <button type="button" onclick="openModal('backupModal')" class="px-2.5 py-2 rounded-xl btn-soft text-xs font-bold">💾</button>
+      <button type="button" onclick="openCardModal(null, activeFolderId)" class="px-3.5 py-2 rounded-xl btn-accent text-xs font-extrabold shadow-md">+ Card</button>
+    </div>
+  </header>
+
+  <!-- MOBILE DRAWER -->
+  <div id="mobileSidebarBackdrop" onclick="closeMobileSidebar()" class="fixed inset-0 z-40 bg-black/70 hidden lg:hidden"></div>
+  <div id="mobileSidebarDrawer" class="fixed inset-y-0 left-0 z-50 w-80 max-w-[86vw] panel-glass border-r p-4 overflow-y-auto transform -translate-x-full transition-transform duration-300 lg:hidden">
+    <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-500/20">
+      <span class="font-extrabold text-sm text-main">📁 Folders & Subfolders</span>
+      <button type="button" onclick="closeMobileSidebar()" class="px-2.5 py-1 rounded-lg btn-soft text-xs font-bold">✕</button>
+    </div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <button type="button" onclick="openFolderModal(null)" class="py-2 rounded-xl btn-accent text-xs font-extrabold">+ Main Folder</button>
+      <button type="button" onclick="openFolderModal(activeFolderId)" class="py-2 rounded-xl btn-soft text-xs font-bold">+ Subfolder</button>
+    </div>
+    <div id="mobileFolderTree" class="space-y-1.5"></div>
+  </div>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="max-w-7xl w-full mx-auto px-3 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="hidden lg:block lg:col-span-4 xl:col-span-3 space-y-5">
+      <div class="panel-glass rounded-3xl p-4 shadow-lg">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-extrabold uppercase tracking-wider text-sub">Study Folders</h2>
+          <span class="text-[11px] text-sub font-semibold">Tap + to add card</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <button type="button" onclick="openFolderModal(null)" class="py-2 rounded-xl btn-accent text-xs font-extrabold">+ Main Folder</button>
+          <button type="button" onclick="openFolderModal(activeFolderId)" class="py-2 rounded-xl btn-soft text-xs font-bold">+ Subfolder</button>
+        </div>
+        <div id="desktopFolderTree" class="space-y-1.5 max-h-[22rem] overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="panel-glass rounded-3xl p-4 space-y-3 shadow-lg">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-extrabold uppercase tracking-wider text-sub">📊 Exam Readiness</h2>
+          <span id="readinessBadge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-500">0%</span>
+        </div>
+        <div class="w-full h-2.5 rounded-full sub-glass overflow-hidden flex">
+          <div id="barMastered" class="bg-emerald-500 transition-all duration-300" style="width:0%"></div>
+          <div id="barLearning" class="bg-amber-400 transition-all duration-300" style="width:0%"></div>
+          <div id="barNew" class="bg-rose-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+        <div class="pt-1 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-bold text-sub">
+            <span>🧠 5-Box Spaced Memory</span>
+            <span id="dueSidebarCount" class="text-amber-500 font-extrabold">0 Due Today</span>
+          </div>
+          <div class="grid grid-cols-5 gap-1.5 text-center text-[10px]">
+            <div class="p-1.5 rounded-xl sub-glass"><span id="box1Cnt" class="font-extrabold text-rose-500 block text-xs">0</span>B1·Now</div>
+            <div class="p-1.5 rounded-xl sub-glass"><span id="box2Cnt" class="font-extrabold text-amber-500 block text-xs">0</span>B2·1d</div>
+            <div class="p-1.5 rounded-xl sub-glass"><span id="box3Cnt" class="font-extrabold text-sky-400 block text-xs">0</span>B3·3d</div>
+            <div class="p-1.5 rounded-xl sub-glass"><span id="box4Cnt" class="font-extrabold text-indigo-400 block text-xs">0</span>B4·7d</div>
+            <div class="p-1.5 rounded-xl sub-glass"><span id="box5Cnt" class="font-extrabold text-emerald-500 block text-xs">0</span>B5·14d</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT STUDY AREA -->
+    <main class="lg:col-span-8 xl:col-span-9 space-y-4">
+
+      <!-- Folder Header & Mode Tabs -->
+      <div class="panel-glass rounded-3xl p-4 sm:p-5 space-y-3.5 shadow-lg">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div id="folderBreadcrumb" class="flex flex-wrap items-center gap-1.5 text-xs font-bold text-indigo-400"></div>
+            <div class="flex items-center gap-2.5 mt-1 flex-wrap">
+              <h1 id="activeFolderTitle" class="text-xl sm:text-2xl font-extrabold text-main">Folder</h1>
+              <span id="activeFolderCount" class="text-xs px-2.5 py-0.5 rounded-full btn-soft font-bold">0 cards</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="openCardModal(null, activeFolderId)" class="px-3 py-1.5 rounded-xl btn-accent text-xs font-extrabold shadow">+ Add Card Here</button>
+            <button type="button" onclick="openFolderModal(activeFolderId)" class="px-2.5 py-1.5 rounded-xl btn-soft text-xs font-bold">+ Subfolder</button>
+            <button type="button" onclick="openRenameFolderModal()" class="px-2.5 py-1.5 rounded-xl btn-soft text-xs font-semibold">✎</button>
+            <button type="button" onclick="deleteActiveFolder()" class="px-2.5 py-1.5 rounded-xl bg-rose-500/15 text-rose-500 border border-rose-500/30 text-xs font-bold">🗑</button>
+          </div>
+        </div>
+
+        <div id="subfolderPillsContainer" class="hidden pt-2 border-t border-slate-500/20">
+          <div class="flex items-center gap-2 flex-wrap" id="subfolderPillsList"></div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-500/20 text-xs">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <label class="flex items-center gap-1.5 cursor-pointer text-sub font-semibold mr-1">
+              <input type="checkbox" id="includeSubfoldersToggle" checked onchange="toggleIncludeSubfolders()" class="rounded w-4 h-4 accent-indigo-600" />
+              <span>Subfolders (<strong id="subfoldersScopeHint">ON</strong>)</span>
+            </label>
+            <button type="button" onclick="toggleDueFilter()" id="btnFilterDue" class="px-2.5 py-1 rounded-lg btn-soft font-bold">📅 Due (<span id="dueBtnCount">0</span>)</button>
+            <button type="button" onclick="toggleStarredFilter()" id="btnFilterStarred" class="px-2.5 py-1 rounded-lg btn-soft font-semibold">⭐ Starred</button>
+            <select id="tagFilterSelect" onchange="setTagFilter(this.value)" class="btn-soft rounded-lg px-2 py-1 text-xs font-bold outline-none">
+              <option value="">🏷️ All Tags</option>
+              <option value="PYQ">🔥 PYQ Only</option>
+              <option value="Trap">⚠️ Trap Only</option>
+              <option value="Shortcut">⚡ Trick Only</option>
+            </select>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="toggleClozeMode()" id="btnClozeToggle" class="px-2.5 py-1 rounded-lg btn-soft font-bold">🧩 Cloze: OFF</button>
+            <button type="button" onclick="toggleReverseCards()" id="btnReverseToggle" class="px-2.5 py-1 rounded-lg btn-soft font-bold">🔄 Term→Def</button>
+            <button type="button" onclick="shuffleActiveCards()" class="px-2 py-1 rounded-lg btn-soft font-semibold">⇄</button>
+            <button type="button" onclick="openBulkModal(activeFolderId)" class="px-2.5 py-1 rounded-lg btn-soft text-indigo-400 font-extrabold">📥 Bulk</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
+          <button type="button" onclick="setStudyMode('flashcards')" id="tab-flashcards" class="py-2.5 px-2 rounded-2xl text-xs font-extrabold border transition">🗂️ Cards</button>
+          <button type="button" onclick="setStudyMode('sheet')" id="tab-sheet" class="py-2.5 px-2 rounded-2xl text-xs font-extrabold border transition">📋 Sheet View</button>
+          <button type="button" onclick="setStudyMode('type')" id="tab-type" class="py-2.5 px-2 rounded-2xl text-xs font-extrabold border transition">⌨️ Type Test</button>
+          <button type="button" onclick="setStudyMode('exam')" id="tab-exam" class="py-2.5 px-2 rounded-2xl text-xs font-extrabold border transition">📝 Exam Hall</button>
+          <button type="button" onclick="setStudyMode('mistakes')" id="tab-mistakes" class="py-2.5 px-2 rounded-2xl text-xs font-extrabold border transition">📕 Mistakes <span id="mistakeTabBadge" class="ml-0.5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] hidden">0</span></button>
+          <button type="button" onclick="setStudyMode('match')" id="tab-match" class="py-2.5 px-2 rounded-2xl text-xs font-extrabold border transition">⚡ Match</button>
+        </div>
+      </div>
+
+      <!-- EMPTY FOLDER LAUNCHPAD -->
+      <section id="emptyFolderLaunchpad" class="hidden panel-glass rounded-3xl p-6 sm:p-8 text-center space-y-5 shadow-lg">
+        <div class="w-14 h-14 rounded-2xl btn-accent mx-auto flex items-center justify-center text-2xl shadow-lg">📂</div>
+        <div class="space-y-1">
+          <h2 id="emptyFolderNameTitle" class="text-lg sm:text-xl font-extrabold text-main">This Folder is Ready for Cards!</h2>
+          <p class="text-xs text-sub max-w-md mx-auto">Add flashcards directly into this folder using any of the 3 quick methods below:</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto">
+          <button type="button" onclick="openCardModal(null, activeFolderId)" class="p-4 rounded-2xl btn-accent font-extrabold text-xs sm:text-sm shadow-lg flex flex-col items-center gap-1.5">
+            <span class="text-xl">➕</span><span>Add Card Manually</span>
+          </button>
+          <button type="button" onclick="openBulkModal(activeFolderId)" class="p-4 rounded-2xl sub-glass font-extrabold text-xs sm:text-sm text-main flex flex-col items-center gap-1.5">
+            <span class="text-xl">📥</span><span>Bulk Paste List</span>
+          </button>
+          <button type="button" onclick="openAiGenModal(activeFolderId)" class="p-4 rounded-2xl bg-gradient-to-br from-fuchsia-600 to-violet-600 text-white font-extrabold text-xs sm:text-sm shadow-lg flex flex-col items-center gap-1.5">
+            <span class="text-xl">✨</span><span>AI Auto-Generate</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 1: NON-INVERTING 2-STAGE FLASHCARDS ==================== -->
+      <section id="view-flashcards" class="space-y-4">
+        <div class="deck-stack-wrap">
+          <div id="flashcardTouchArea" class="w-full h-[22rem] sm:h-[25rem] cursor-pointer select-none" onclick="flipCard()">
+            <div id="flashcardStage" class="card-stage">
+
+              <!-- FRONT FACE -->
+              <div id="cardFrontFace" class="card-face-box card-front-bg p-5 sm:p-7">
+                <div id="frontBlurBackdrop" class="bg-img-blur-backdrop hidden"></div>
+                <div id="frontBgImgLayer" class="bg-img-layer hidden"></div>
+                <div id="frontBgScrim" class="bg-scrim hidden"></div>
+
+                <div class="card-content-layer">
+                  <div class="space-y-2">
+                    <div class="w-full h-1.5 rounded-full bg-slate-500/25 overflow-hidden flex">
+                      <div id="cardTopProgressFill" class="h-full btn-accent transition-all duration-300" style="width: 10%"></div>
+                      <div id="speedCramFill" class="h-full bg-amber-400 transition-all duration-100 hidden" style="width: 100%"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 text-xs flex-wrap">
+                      <div class="flex items-center gap-1.5">
+                        <span id="cardFolderBadge" class="px-2.5 py-0.5 rounded-full btn-soft font-bold text-[11px]">Folder</span>
+                        <span id="cardBoxBadge" class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-extrabold text-[10px]">Box 1</span>
+                        <div id="cardTagsFront" class="flex items-center gap-1"></div>
+                      </div>
+
+                      <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                        <button type="button" id="btnPeekFront" onclick="togglePeekImage()" class="hidden px-2 py-1 rounded-xl bg-black/50 text-white border border-white/25 text-[11px] font-bold">👁️ Peek</button>
+                        <button type="button" id="btnFitFront" onclick="toggleCardImgFit()" class="hidden px-2 py-1 rounded-xl bg-black/50 text-white border border-white/25 text-[11px] font-bold">🖼️ Fill</button>
+                        <button type="button" id="btnBlurFront" onclick="toggleFrontBlur()" class="hidden px-2 py-1 rounded-xl bg-black/50 text-white border border-white/25 text-[11px] font-bold">🙈 Blur</button>
+                        <button type="button" id="btnToggleHint" onclick="toggleHintVisibility()" class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 font-extrabold text-xs">💡 Hint</button>
+                        <button type="button" onclick="speakCurrentSide('front')" class="p-1.5 rounded-xl btn-soft">🔊</button>
+                        <button type="button" id="starBtnFront" onclick="toggleStarCurrentCard()" class="p-1.5 rounded-xl btn-soft text-base leading-none">☆</button>
+                        <button type="button" onclick="editCurrentCard()" class="p-1.5 rounded-xl btn-soft text-xs">✎</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="my-auto text-center px-2 flex flex-col items-center justify-center">
+                    <div class="glass-capsule max-w-xl w-full space-y-2">
+                      <p id="cardFrontText" class="text-xl sm:text-3xl font-extrabold text-main leading-snug break-words"></p>
+                      <div id="cardHintBox" onclick="event.stopPropagation()" class="hidden pt-2 border-t border-amber-500/30 text-xs sm:text-sm text-amber-400 font-bold">
+                        <span id="cardHintText"></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-bottom-bar flex items-center justify-between text-[11px] text-sub font-semibold">
+                    <span id="cardDueText">Due: Today</span>
+                    <span>Tap to flip · Swipe left/right</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BACK FACE -->
+              <div id="cardBackFace" class="card-face-box card-back-bg p-5 sm:p-7 hidden">
+                <div id="backBlurBackdrop" class="bg-img-blur-backdrop hidden"></div>
+                <div id="backBgImgLayer" class="bg-img-layer hidden"></div>
+                <div id="backBgScrim" class="bg-scrim hidden"></div>
+
+                <div class="card-content-layer">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="uppercase font-extrabold text-emerald-400 tracking-wider">Answer & Breakdown</span>
+                    <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
+                      <button type="button" id="btnPeekBack" onclick="togglePeekImage()" class="hidden px-2 py-1 rounded-xl bg-black/50 text-white border border-white/25 text-[11px] font-bold">👁️ Peek</button>
+                      <button type="button" id="starBtnBack" onclick="toggleStarCurrentCard()" class="px-2.5 py-1 rounded-xl btn-soft font-extrabold text-xs">⭐ Star</button>
+                      <button type="button" onclick="explainCurrentCardWithAi()" class="px-2.5 py-1 rounded-xl bg-violet-500/20 text-violet-300 border border-violet-500/30 font-extrabold text-xs">✨ AI Explain</button>
+                      <button type="button" onclick="speakCurrentSide('back')" class="p-1.5 rounded-xl btn-soft">🔊</button>
+                    </div>
+                  </div>
+
+                  <div class="my-auto text-center px-2 flex flex-col items-center justify-center overflow-y-auto max-h-60">
+                    <div class="glass-capsule max-w-xl w-full space-y-2.5">
+                      <p id="cardBackText" class="text-base sm:text-2xl font-extrabold text-main leading-relaxed break-words"></p>
+                      <div id="cardMarathiBox" class="hidden inline-block px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-bold"></div>
+                      <div id="cardSynTrapBox" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/35 text-rose-300 text-xs font-bold"></div>
+                    </div>
+                  </div>
+
+                  <div class="card-bottom-bar flex items-center justify-between text-[11px] text-sub font-semibold">
+                    <span>Rate below to schedule next Spaced Review</span>
+                    <span>Tap to flip back</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div id="flashcardAiBox" class="hidden p-4 rounded-2xl panel-glass border-violet-500/40 text-xs sm:text-sm"></div>
+
+        <div class="panel-glass rounded-3xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+          <div class="flex items-center gap-1.5 flex-wrap justify-center">
+            <button type="button" onclick="prevCard()" class="px-3 py-2 rounded-xl btn-soft font-extrabold text-xs">←</button>
+            <span id="cardProgressCounter" class="text-xs sm:text-sm font-extrabold text-main min-w-[3.8rem] text-center">1 / 1</span>
+            <button type="button" onclick="nextCard()" class="px-3 py-2 rounded-xl btn-soft font-extrabold text-xs">→</button>
+            <button type="button" id="btnSpeedCram" onclick="toggleSpeedCram()" class="px-2.5 py-2 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/30 text-xs font-extrabold">⏱️ 8s Speed</button>
+            <button type="button" id="btnAutoPlay" onclick="toggleAutoPlayAudio()" class="px-2.5 py-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 text-xs font-extrabold">🎧 Audio</button>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button type="button" onclick="rateCurrentCard('new')" class="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-rose-500/15 text-rose-500 border border-rose-500/30 text-xs font-extrabold">
+              🔄 Again <span class="block text-[9px] opacity-75">Box 1 · Today</span>
+            </button>
+            <button type="button" onclick="rateCurrentCard('learning')" class="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/30 text-xs font-extrabold">
+              ⚡ Good <span id="goodNextInterval" class="block text-[9px] opacity-75">+1 Box</span>
+            </button>
+            <button type="button" onclick="rateCurrentCard('mastered')" class="flex-1 sm:flex-initial px-3 py-2 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 text-xs font-extrabold">
+              ✅ Easy <span id="easyNextInterval" class="block text-[9px] opacity-75">+2 Boxes</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 2: CHEAT-SHEET TABLE VIEW ==================== -->
+      <section id="view-sheet" class="hidden panel-glass rounded-3xl p-5 space-y-4 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-500/20 pb-3">
+          <div>
+            <span class="text-xs font-extrabold uppercase text-indigo-400">Rapid 2-Column Revision Sheet</span>
+            <h3 class="text-lg font-extrabold text-main">📋 Folder Cheat-Sheet Table</h3>
+          </div>
+          <button type="button" id="btnCoverSheet" onclick="toggleSheetCover()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 text-amber-500 border border-amber-500/40 text-xs font-extrabold">
+            🙈 Cover Answers (Test Yourself)
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="border-b border-slate-500/30 text-sub uppercase text-[11px]">
+                <th class="py-2.5 px-3 w-[36%]">Term / Question</th>
+                <th class="py-2.5 px-3">Meaning, Marathi Hook & Exam Traps</th>
+                <th class="py-2.5 px-2 w-16 text-center">Box</th>
+              </tr>
+            </thead>
+            <tbody id="cheatSheetTableBody" class="divide-y divide-slate-500/15"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 3: TYPE / SPELL THE ANSWER MODE ==================== -->
+      <section id="view-type" class="hidden panel-glass rounded-3xl p-5 sm:p-6 space-y-4 shadow-lg">
+        <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+          <div>
+            <span class="text-xs font-extrabold uppercase text-indigo-400">Active Recall Spelling Test</span>
+            <h3 class="text-lg font-extrabold text-main">⌨️ Type the Exact Term / Word</h3>
+          </div>
+          <button type="button" onclick="loadNextTypeCard()" class="px-3 py-1.5 rounded-xl btn-soft text-xs font-bold">Skip →</button>
+        </div>
+
+        <div class="p-5 rounded-2xl sub-glass space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sub uppercase">Meaning / Clue:</span>
+            <button type="button" id="typeStarBtn" onclick="toggleStarTypeCard()" class="px-2.5 py-1 rounded-lg btn-soft text-xs font-bold">⭐ Star Word</button>
+          </div>
+          <p id="typePromptText" class="text-base sm:text-xl font-extrabold text-main leading-relaxed"></p>
+          <div id="typeMarathiClue" class="hidden text-xs font-bold text-amber-500"></div>
+          <div class="flex items-center gap-2 pt-1">
+            <span class="text-xs font-bold text-indigo-400">Letter Mask:</span>
+            <code id="typeMaskHint" class="px-2.5 py-1 rounded-lg btn-soft font-mono text-xs sm:text-sm font-bold tracking-widest"></code>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <input id="typeAnswerInput" type="text" placeholder="Type exact word here..." onkeydown="if(event.key==='Enter') checkTypedAnswer()" class="flex-1 sub-glass rounded-xl px-4 py-3 text-sm font-bold text-main outline-none" />
+          <button type="button" onclick="checkTypedAnswer()" class="px-5 py-3 rounded-xl btn-accent text-xs sm:text-sm font-extrabold shadow">Check</button>
+          <button type="button" onclick="revealTypedAnswer()" class="px-3.5 py-3 rounded-xl btn-soft text-xs font-bold">Reveal</button>
+        </div>
+        <div id="typeFeedbackBox" class="hidden p-4 rounded-2xl text-xs sm:text-sm font-bold"></div>
+      </section>
+
+      <!-- ==================== VIEW 4: ADVANCED EXAM HALL (MULTI-PATTERN + AI SETTER) ==================== -->
+      <section id="view-exam" class="hidden panel-glass rounded-3xl p-5 space-y-5 shadow-lg">
+        <div id="examSetupPanel" class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-500/20 pb-3">
+            <div>
+              <span class="text-xs font-extrabold uppercase text-indigo-400">Multi-Pattern Competitive Exam Framing Engine</span>
+              <h2 class="text-xl font-extrabold text-main mt-0.5">📝 Advanced Exam Hall Setup</h2>
+            </div>
+            <span id="examSetSeedBadge" class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-400 font-extrabold">Set #1</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Exam Pattern Selector -->
+            <div class="p-3.5 rounded-2xl sub-glass space-y-1.5">
+              <label class="text-xs font-bold uppercase text-sub">Exam Question Framing Pattern</label>
+              <select id="examPatternSelect" class="w-full btn-soft rounded-xl p-2.5 text-xs sm:text-sm font-extrabold">
+                <option value="exam_mix" selected>🔥 Full Exam Mix (Statements + Match Pairs + Incorrect Pair + OWS)</option>
+                <option value="statement">📜 Multi-Statement Only (1 only / 2 only / Both / Neither)</option>
+                <option value="match_pairs">🔗 Match the Following Pairs (List-I vs List-II)</option>
+                <option value="incorrect_pair">⚠️ Spot the INCORRECT Pair (Odd One Out Trap)</option>
+                <option value="def_to_term">🧠 OWS / Reverse (Meaning → Choose Word)</option>
+                <option value="term_to_def">📖 Standard Direct (Word → Choose Meaning)</option>
+              </select>
+            </div>
+
+            <!-- Custom Question Count Input + Quick Pills -->
+            <div class="p-3.5 rounded-2xl sub-glass space-y-1.5">
+              <label class="text-xs font-bold uppercase text-sub">How Many Questions?</label>
+              <div class="flex items-center gap-2">
+                <input id="examCustomCountInput" type="number" min="1" max="100" value="15" class="w-20 btn-soft rounded-xl p-2 text-center text-sm font-extrabold outline-none" />
+                <div class="flex flex-wrap gap-1">
+                  <button type="button" onclick="setExamCount(10)" class="px-2.5 py-1.5 rounded-lg btn-soft text-xs font-bold">10</button>
+                  <button type="button" onclick="setExamCount(20)" class="px-2.5 py-1.5 rounded-lg btn-soft text-xs font-bold">20</button>
+                  <button type="button" onclick="setExamCount(35)" class="px-2.5 py-1.5 rounded-lg btn-soft text-xs font-bold">35</button>
+                  <button type="button" onclick="setExamCount(50)" class="px-2.5 py-1.5 rounded-lg btn-soft text-xs font-bold">50</button>
+                  <button type="button" onclick="setExamCount(999)" class="px-2.5 py-1.5 rounded-lg btn-soft text-xs font-bold">All</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Question Pool Source -->
+            <div class="p-3.5 rounded-2xl sub-glass space-y-1.5">
+              <label class="text-xs font-bold uppercase text-sub">Question Pool Source</label>
+              <select id="examSourceSelect" class="w-full btn-soft rounded-xl p-2 text-xs sm:text-sm font-bold">
+                <option value="all" selected>📂 All Cards in Current Folder Scope</option>
+                <option value="due_only">📅 Only Cards Due Today (Spaced Repetition)</option>
+                <option value="starred_only">⭐ Only Starred / Hard Words</option>
+                <option value="mistakes_only">📕 Only Cards From My Mistake Book</option>
+              </select>
+            </div>
+
+            <!-- Negative Marking & Feedback -->
+            <div class="p-3.5 rounded-2xl sub-glass space-y-1.5">
+              <label class="text-xs font-bold uppercase text-sub">Marking & Feedback Mode</label>
+              <div class="grid grid-cols-2 gap-2">
+                <select id="examNegativeSelect" class="w-full btn-soft rounded-xl p-2 text-xs font-bold">
+                  <option value="0.25">+1 / -0.25 Neg</option>
+                  <option value="0.33">+1 / -0.33 Neg</option>
+                  <option value="0">No Negative</option>
+                </select>
+                <select id="examFeedbackModeSelect" class="w-full btn-soft rounded-xl p-2 text-xs font-bold">
+                  <option value="instant" selected>Instant Explain</option>
+                  <option value="end">End Scorecard</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="aiExamGenStatus" class="hidden p-3 rounded-2xl bg-violet-500/20 border border-violet-500/40 text-xs font-bold text-violet-300"></div>
+
+          <!-- 2 Launch Buttons: Built-In Smart Framing vs Live Gemini AI Exam Paper -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <button type="button" onclick="startMockExam(false, true)" class="py-3.5 px-4 rounded-2xl btn-accent font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+              <span>🚀 Start Smart Exam Paper (New Set)</span>
+            </button>
+            <button type="button" onclick="generateAiFreshExamPaper()" class="py-3.5 px-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+              <span>✨ AI Frame Unseen Exam Paper (Gemini)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Exam Hall Interface -->
+        <div id="examActivePanel" class="hidden space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl sub-glass">
+            <div class="flex items-center gap-2">
+              <span id="examQCounter" class="text-sm font-extrabold text-indigo-400">Q. 1</span>
+              <span id="examQuestionTypeTag" class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-extrabold uppercase">Pattern</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="startMockExam(false, true)" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 text-xs font-extrabold" title="Generate Fresh Question Set">🔄 New Set</button>
+              <button type="button" id="examStarBtn" onclick="toggleStarExamQuestion()" class="px-2.5 py-1 rounded-lg btn-soft text-xs font-bold">⭐ Star</button>
+              <button type="button" onclick="toggleExamQuestionHint()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-500 text-xs font-bold">💡 Hint</button>
+              <span class="text-xs text-sub">⏱ <strong id="examTimerDisplay" class="font-mono text-main">00:00</strong></span>
+              <button type="button" onclick="submitMockExam()" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold">Submit</button>
+            </div>
+          </div>
+
+          <!-- Question Stem Box -->
+          <div class="p-4 sm:p-5 rounded-2xl sub-glass space-y-3">
+            <img id="examQuestionImage" class="hidden max-h-48 mx-auto rounded-2xl object-contain shadow" alt="" />
+            <div id="examQuestionStem" class="text-sm sm:text-base font-extrabold text-main whitespace-pre-line leading-relaxed"></div>
+            <div id="examQuestionHintBox" class="hidden p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-500 font-bold"></div>
+          </div>
+
+          <div id="examOptionsGrid" class="grid grid-cols-1 gap-2.5"></div>
+          <div id="examInstantTutorBox" class="hidden p-4 rounded-2xl border space-y-2 text-xs sm:text-sm"></div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-slate-500/20">
+            <button type="button" onclick="goExamQuestion(examCurrentIndex - 1)" class="px-4 py-2 rounded-xl btn-soft text-xs font-bold">← Prev</button>
+            <button type="button" onclick="goExamQuestion(examCurrentIndex + 1)" class="px-4 py-2 rounded-xl btn-accent text-xs font-extrabold">Next Question →</button>
+          </div>
+          <div id="examPaletteGrid" class="flex flex-wrap gap-1.5 pt-2"></div>
+        </div>
+
+        <!-- Exam Result Scorecard -->
+        <div id="examResultPanel" class="hidden space-y-5">
+          <div class="p-4 rounded-2xl sub-glass flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 id="examFinalScoreText" class="text-2xl font-extrabold text-main">Score: 0</h3>
+              <p id="examFinalSummarySub" class="text-xs text-sub mt-1 font-semibold"></p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="startMockExam(false, true)" class="px-3.5 py-2 rounded-xl btn-accent text-xs font-extrabold shadow">🔄 New Question Set</button>
+              <button type="button" onclick="setStudyMode('mistakes')" class="px-3.5 py-2 rounded-xl bg-rose-500/20 text-rose-500 text-xs font-extrabold">📕 Mistake Book</button>
+              <button type="button" onclick="showExamSetup()" class="px-3.5 py-2 rounded-xl btn-soft text-xs font-bold">Setup</button>
+            </div>
+          </div>
+          <div id="examSolutionsList" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 5: MISTAKE NOTEBOOK ==================== -->
+      <section id="view-mistakes" class="hidden panel-glass rounded-3xl p-5 space-y-4 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-500/20 pb-3">
+          <div>
+            <h2 class="text-lg font-extrabold text-main">📕 Automatic Mistake Notebook</h2>
+            <p class="text-xs text-sub">Questions you missed in Mock Tests or marked "Again".</p>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="startMockExam(true, true)" class="px-3.5 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow">🎯 Test My Mistakes</button>
+            <button type="button" onclick="clearAllMistakes()" class="px-3 py-2 rounded-xl btn-soft text-xs font-bold">Clear All</button>
+          </div>
+        </div>
+        <div id="mistakeNotebookList" class="space-y-3"></div>
+      </section>
+
+      <!-- ==================== VIEW 6: MATCH GAME ==================== -->
+      <section id="view-match" class="hidden panel-glass rounded-3xl p-5 space-y-4 shadow-lg">
+        <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+          <span class="text-sm font-extrabold text-main">⚡ Speed Match Challenge</span>
+          <div class="flex items-center gap-3">
+            <span id="matchTimer" class="text-base font-mono font-extrabold text-indigo-400">0.0s</span>
+            <button type="button" onclick="startMatchGame()" class="px-3.5 py-1.5 rounded-xl btn-accent text-xs font-extrabold">Restart</button>
+          </div>
+        </div>
+        <div id="matchGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 min-h-[16rem]"></div>
+      </section>
+
+      <!-- ==================== CARDS LIST ==================== -->
+      <section class="panel-glass rounded-3xl p-4 sm:p-5 space-y-3 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="selectAllCardsCheck" onchange="toggleSelectAllCards(this.checked)" class="rounded w-4 h-4 accent-indigo-600" />
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-sub">Cards in Scope (<span id="cardTableCount">0</span>)</h2>
+          </div>
+          <button type="button" onclick="openCardModal(null, activeFolderId)" class="px-3 py-1 rounded-xl btn-accent text-xs font-extrabold">+ Add Card Here</button>
+        </div>
+
+        <div id="bulkActionToolbar" class="hidden p-3 rounded-2xl sub-glass flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span class="font-extrabold text-indigo-400"><span id="selectedCardsCount">0</span> selected</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="bulkMoveTargetSelect" class="btn-soft rounded-xl px-2.5 py-1.5 text-xs font-bold"></select>
+            <button type="button" onclick="moveSelectedCardsToFolder()" class="px-3 py-1.5 rounded-xl btn-accent font-extrabold">📁 Move Here</button>
+            <button type="button" onclick="deleteSelectedCards()" class="px-3 py-1.5 rounded-xl bg-rose-600 text-white font-extrabold">🗑 Delete</button>
+          </div>
+        </div>
+
+        <div id="deckCardsList" class="space-y-2"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+  <div id="cardModal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="panel-glass rounded-3xl max-w-lg w-full p-5 space-y-3 my-8 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 id="cardModalTitle" class="text-base font-extrabold text-main">Add Flashcard</h3>
+        <button type="button" onclick="closeModal('cardModal')" class="text-sub font-bold">✕</button>
+      </div>
+      <input type="hidden" id="editCardId" />
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[11px] font-bold text-sub mb-1">Target Folder</label>
+          <select id="inputCardFolderSelect" class="w-full btn-soft rounded-xl p-2 text-xs font-extrabold"></select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-sub mb-1">Exam Tag (Optional)</label>
+          <div class="flex gap-1">
+            <button type="button" onclick="toggleModalTag('PYQ')" id="tagBtn-PYQ" class="flex-1 py-2 rounded-xl btn-soft text-[11px] font-extrabold">🔥 PYQ</button>
+            <button type="button" onclick="toggleModalTag('Trap')" id="tagBtn-Trap" class="flex-1 py-2 rounded-xl btn-soft text-[11px] font-extrabold">⚠️ Trap</button>
+            <button type="button" onclick="toggleModalTag('Shortcut')" id="tagBtn-Shortcut" class="flex-1 py-2 rounded-xl btn-soft text-[11px] font-extrabold">⚡ Trick</button>
+          </div>
+        </div>
+      </div>
+      <textarea id="inputCardFront" rows="2" class="w-full sub-glass rounded-xl p-2.5 text-sm text-main font-semibold outline-none" placeholder="Front (Word / Question / Article)"></textarea>
+      <textarea id="inputCardBack" rows="2" class="w-full sub-glass rounded-xl p-2.5 text-sm text-main font-semibold outline-none" placeholder="Back (Main English Meaning / Answer — wrap [words] for Cloze)"></textarea>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <input id="inputCardMarathi" type="text" class="w-full sub-glass rounded-xl p-2 text-xs text-main font-semibold outline-none" placeholder="🇮🇳 मराठी अर्थ / Native Hook (Optional)" />
+        <input id="inputCardSynTrap" type="text" class="w-full sub-glass rounded-xl p-2 text-xs text-main font-semibold outline-none" placeholder="⚠️ Syn / Ant / Don't Confuse With..." />
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label class="text-xs font-bold text-amber-500">💡 Memory Hint (Hidden until 💡 pressed)</label>
+          <button type="button" onclick="generateHintForModalWithAi()" class="text-[11px] font-extrabold text-violet-400 underline">✨ AI Hint</button>
+        </div>
+        <input id="inputCardHint" type="text" class="w-full sub-glass rounded-xl p-2 text-xs text-main outline-none" placeholder="Optional mnemonic or shortcut..." />
+      </div>
+      <div class="p-3 rounded-2xl sub-glass space-y-2">
+        <div class="flex items-center justify-between flex-wrap gap-1">
+          <span class="text-xs font-extrabold text-indigo-400">🖼️ Full-Background Visual Image</span>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="pasteImageFromClipboard()" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-extrabold">📋 Paste Image</button>
+            <select id="inputCardImageSide" class="btn-soft rounded-lg px-2 py-1 text-[11px] font-bold">
+              <option value="both">Both Sides</option>
+              <option value="front">Front Only</option>
+              <option value="back">Back Only</option>
+            </select>
+          </div>
+        </div>
+        <input type="file" id="inputCardImageFile" accept="image/*" onchange="handleImageUpload(event)" class="block w-full text-xs text-sub" />
+        <div id="imagePreviewWrapper" class="hidden flex items-center justify-between pt-1">
+          <img id="imagePreviewThumb" class="h-14 rounded-lg object-cover border border-white/20" alt="" />
+          <button type="button" onclick="clearAttachedImage()" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-500 text-xs font-bold">Remove</button>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="closeModal('cardModal')" class="px-4 py-2 rounded-xl btn-soft text-xs font-bold">Cancel</button>
+        <button type="button" onclick="saveCard()" class="px-5 py-2 rounded-xl btn-accent text-xs font-extrabold shadow">Save Card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLDER MODAL -->
+  <div id="folderModal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4">
+    <div class="panel-glass rounded-3xl max-w-md w-full p-5 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 id="folderModalTitle" class="text-base font-extrabold text-main">Folder</h3>
+        <button type="button" onclick="closeModal('folderModal')" class="text-sub font-bold">✕</button>
+      </div>
+      <input type="hidden" id="folderParentIdInput" />
+      <input type="hidden" id="folderEditModeInput" />
+      <div id="folderParentNotice" class="text-xs text-indigo-400 font-bold p-2.5 rounded-xl bg-indigo-500/10"></div>
+      <div class="flex gap-2">
+        <select id="inputFolderIcon" class="btn-soft rounded-xl px-2.5 py-2.5 text-base">
+          <option value="📁">📁</option><option value="🇬🇧">🇬🇧</option><option value="🏛️">🏛️</option>
+          <option value="⚖️">⚖️</option><option value="📜">📜</option><option value="🧠">🧠</option>
+          <option value="🎯">🎯</option><option value="📖">📖</option>
+        </select>
+        <input id="inputFolderName" type="text" class="flex-1 sub-glass rounded-xl p-2.5 text-sm font-bold text-main outline-none" placeholder="e.g., Day 3 Vocab, Idioms" />
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="closeModal('folderModal')" class="px-4 py-2 rounded-xl btn-soft text-xs font-bold">Cancel</button>
+        <button type="button" onclick="saveFolderModal()" class="px-5 py-2 rounded-xl btn-accent text-xs font-extrabold shadow">Save Folder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BULK PASTE MODAL -->
+  <div id="importModal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4">
+    <div class="panel-glass rounded-3xl max-w-lg w-full p-5 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-main">📥 Bulk Paste Cards into Folder</h3>
+        <button type="button" onclick="closeModal('importModal')" class="text-sub font-bold">✕</button>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-sub mb-1">Save Pasted Cards Into:</label>
+        <select id="bulkTargetFolderSelect" class="w-full btn-soft rounded-xl p-2 text-xs sm:text-sm font-extrabold"></select>
+      </div>
+      <p class="text-[11px] text-sub">Format: <code>Word | Meaning | Hint | Marathi/Syn</code> (1 card per line)</p>
+      <textarea id="bulkImportText" rows="5" class="w-full sub-glass rounded-xl p-3 text-xs font-mono text-main outline-none" placeholder="Ephemeral | Lasting a very short time | E-femoral fades fast | क्षणभंगुर"></textarea>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeModal('importModal')" class="px-4 py-2 rounded-xl btn-soft text-xs font-bold">Cancel</button>
+        <button type="button" onclick="processBulkImport()" class="px-5 py-2 rounded-xl btn-accent text-xs font-extrabold shadow">Import Cards</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI GENERATE CARDS MODAL -->
+  <div id="aiGenModal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4">
+    <div class="panel-glass rounded-3xl max-w-md w-full p-5 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-main">✨ AI Flashcard & Note Extractor</h3>
+        <button type="button" onclick="closeModal('aiGenModal')" class="text-sub font-bold">✕</button>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-sub mb-1">Save Generated Cards Into:</label>
+        <select id="aiGenFolderSelect" class="w-full btn-soft rounded-xl p-2 text-xs sm:text-sm font-extrabold"></select>
+      </div>
+      <textarea id="aiGenTopicInput" rows="3" class="w-full sub-glass rounded-xl p-2.5 text-xs font-bold text-main outline-none" placeholder="Type a topic OR paste a paragraph of your notes here..."></textarea>
+      <select id="aiGenCountSelect" class="w-full btn-soft rounded-xl p-2 text-xs font-bold">
+        <option value="5">5 High-Yield Cards (with Marathi & Hints)</option>
+        <option value="10">10 High-Yield Cards (with Marathi & Hints)</option>
+      </select>
+      <div id="aiGenStatus" class="hidden p-2.5 rounded-xl text-xs font-bold"></div>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeModal('aiGenModal')" class="px-4 py-2 rounded-xl btn-soft text-xs font-bold">Cancel</button>
+        <button type="button" onclick="generateCardsWithAi()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white text-xs font-extrabold shadow">✨ Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI KEY MODAL -->
+  <div id="aiModal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4">
+    <div class="panel-glass rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-main">✨ Gemini AI Key Setup</h3>
+        <button type="button" onclick="closeModal('aiModal')" class="text-sub font-bold">✕</button>
+      </div>
+      <input id="inputGeminiApiKey" type="password" class="w-full sub-glass rounded-xl p-2.5 text-xs font-mono text-main outline-none" placeholder="AIzaSy..." />
+      <div id="aiKeyTestStatus" class="hidden p-2.5 rounded-xl text-xs font-bold"></div>
+      <a href="https://aistudio.google.com/app/apikey" target="_blank" class="block text-xs text-indigo-400 underline font-bold">↗ Get free key from Google AI Studio</a>
+      <div class="flex justify-between items-center pt-2">
+        <button type="button" onclick="testGeminiKey()" class="px-3.5 py-2 rounded-xl bg-violet-500/20 text-violet-400 border border-violet-500/30 text-xs font-extrabold">⚡ Test Key</button>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeModal('aiModal')" class="px-4 py-2 rounded-xl btn-soft text-xs font-bold">Cancel</button>
+          <button type="button" onclick="saveAiApiKey()" class="px-4 py-2 rounded-xl btn-accent text-xs font-extrabold">Save Key</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YPT MODAL -->
+  <div id="yptModal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4">
+    <div class="panel-glass rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-main">🔥 YPT Study Session Output</h3>
+        <button type="button" onclick="closeModal('yptModal')" class="text-sub font-bold">✕</button>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="p-3 rounded-2xl sub-glass"><span id="yptModalCards" class="text-lg font-extrabold text-indigo-400 block">0</span><span class="text-[10px] text-sub font-bold">Cards Flipped</span></div>
+        <div class="p-3 rounded-2xl sub-glass"><span id="yptModalMcqs" class="text-lg font-extrabold text-emerald-500 block">0</span><span class="text-[10px] text-sub font-bold">MCQs Solved</span></div>
+        <div class="p-3 rounded-2xl sub-glass"><span id="yptModalAccuracy" class="text-lg font-extrabold text-amber-500 block">--%</span><span class="text-[10px] text-sub font-bold">Accuracy</span></div>
+      </div>
+      <div class="flex justify-between">
+        <button type="button" onclick="resetYptSession()" class="px-3 py-2 rounded-xl bg-rose-500/15 text-rose-500 text-xs font-extrabold">↻ Reset Counter</button>
+        <button type="button" onclick="closeModal('yptModal')" class="px-4 py-2 rounded-xl btn-accent text-xs font-extrabold">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKUP MODAL -->
+  <div id="backupModal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4">
+    <div class="panel-glass rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-main">💾 Backup & Restore</h3>
+        <button type="button" onclick="closeModal('backupModal')" class="text-sub font-bold">✕</button>
+      </div>
+      <button type="button" onclick="exportBackupJson()" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold shadow">⬇ Download Backup (.json)</button>
+      <div class="p-3 rounded-2xl sub-glass space-y-2">
+        <span class="text-xs font-bold text-indigo-400 block">Restore Backup File:</span>
+        <input type="file" accept=".json" onchange="importBackupJson(event)" class="block w-full text-xs text-sub" />
+      </div>
+      <div class="flex justify-between items-center pt-2">
+        <button type="button" onclick="resetToDefaultData()" class="text-xs text-rose-500 font-extrabold">Reset Sample Data</button>
+        <button type="button" onclick="closeModal('backupModal')" class="px-4 py-1.5 rounded-xl btn-soft text-xs font-bold">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DAY_MS = 86400000;
+    const BOX_DAYS = { 1: 0, 2: 1, 3: 3, 4: 7, 5: 14 };
+
+    const DEFAULT_DATA = {
+      folders: [
+        { id: 'f-eng', name: 'English Language', icon: '🇬🇧', parentId: null },
+        { id: 'f-eng-vocab', name: 'Daily Vocabulary', icon: '📖', parentId: 'f-eng' },
+        { id: 'f-eng-day1', name: 'Day 1 - Vocab', icon: '🎯', parentId: 'f-eng-vocab' },
+        { id: 'f-eng-day2', name: 'Day 2 - Vocab', icon: '🎯', parentId: 'f-eng-vocab' },
+        { id: 'f-eng-ows', name: 'One Word Substitution (OWS)', icon: '🧠', parentId: 'f-eng' },
+        { id: 'f-eng-syn', name: 'Synonyms & Antonyms', icon: '🔤', parentId: 'f-eng' },
+        { id: 'f-gs', name: 'General Studies & Polity', icon: '🏛️', parentId: null },
+        { id: 'f-gs-polity', name: 'Constitutional Articles & Writs', icon: '⚖️', parentId: 'f-gs' }
+      ],
+      cards: [
+        { id: 'c1', folderId: 'f-eng-day1', front: 'Ephemeral', back: 'Lasting for a very short time; transitory', marathi: 'क्षणभंगुर / अल्पजीवी', synTrap: 'Syn: Fleeting, Transient | Ant: Eternal, Perennial', hint: 'Fades away quickly like morning mist', tags: ['PYQ'], box: 2, nextReview: Date.now() - 1000, status: 'learning', starred: true, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 1, lastWrongText: null, aiExplanation: null },
+        { id: 'c2', folderId: 'f-eng-day1', front: 'Pragmatic', back: 'Dealing with things sensibly and realistically based on [practical] considerations.', marathi: 'व्यावहारिक / वास्तववादी', synTrap: 'Syn: Realistic | ⚠️ Don\'t confuse with Dogmatic (rigid)', hint: 'Practical approach over theory', tags: ['PYQ'], box: 4, nextReview: Date.now() + 3 * DAY_MS, status: 'mastered', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'c3', folderId: 'f-eng-day2', front: 'Ubiquitous', back: 'Present, appearing, or found [everywhere] at the same time.', marathi: 'सर्वव्यापी (Omnipresent)', synTrap: 'Syn: Pervasive | Ant: Rare, Scarce', hint: 'Like smartphones today — everywhere', tags: ['PYQ'], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: true, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'c4', folderId: 'f-eng-day2', front: 'Meticulous', back: 'Showing great attention to [detail]; very careful and precise.', marathi: 'अतिशय काळजीपूर्वक / काटेकोर', synTrap: 'Syn: Scrupulous, Punctilious | Ant: Careless', hint: 'Micro-level care for every detail', tags: [], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'c5', folderId: 'f-eng-ows', front: 'Infallible', back: 'A person or thing that [never fails] or makes a mistake; incapable of error.', marathi: 'अचूक / कधीही न चुकणारा', synTrap: '⚠️ Don\'t confuse with Inevitable (certain to happen)', hint: 'In (Not) + Fallible (Falling/Failing)', tags: ['PYQ', 'Trap'], box: 2, nextReview: Date.now() - 1000, status: 'learning', starred: true, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 1, lastWrongText: null, aiExplanation: null },
+        { id: 'c6', folderId: 'f-eng-ows', front: 'Altruist', back: 'A person who acts [unselfishly] for the welfare of others.', marathi: 'परोपकारी व्यक्ती', synTrap: 'Syn: Philanthropist | Ant: Egoist', hint: 'Lover of mankind / others', tags: ['PYQ'], box: 5, nextReview: Date.now() + 7 * DAY_MS, status: 'mastered', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'c7', folderId: 'f-eng-ows', front: 'Stoic', back: 'A person who can endure pain or hardship without showing feelings or complaining.', marathi: 'सुख-दुःखात शांत राहणारा (स्थितप्रज्ञ)', synTrap: 'Ant: Hedonist (pleasure seeker)', hint: 'Calm and indifferent to pain or pleasure', tags: [], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'c8', folderId: 'f-eng-syn', front: 'Candid', back: 'Frank, outspoken, honest, and sincere.', marathi: 'निष्कपट / स्पष्टवक्ता', synTrap: 'Syn: Forthright | Ant: Devious, Guarded', hint: 'Candid camera = unposed and genuine', tags: ['Shortcut'], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'c9', folderId: 'f-gs-polity', front: 'Article 21', back: 'Protection of Life and Personal Liberty: No person shall be deprived except according to procedure established by law.', marathi: 'जीविताचा व व्यक्तिगत स्वातंत्र्याचा हक्क', synTrap: '⚠️ Never suspended even during National Emergency (44th Amendment 1978)', hint: 'Heart of Fundamental Rights (Life & Liberty)', tags: ['PYQ', 'Trap'], box: 4, nextReview: Date.now() + 2 * DAY_MS, status: 'mastered', starred: true, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'p2', folderId: 'f-gs-polity', front: 'Article 14', back: 'Equality before the Law (British concept) and Equal Protection of the Laws (American concept).', marathi: 'कायद्यापुढे समानता', synTrap: 'First Article of Right to Equality (Articles 14–18)', hint: 'Rule of Law (A.V. Dicey)', tags: ['PYQ'], box: 2, nextReview: Date.now() - 1000, status: 'learning', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'p3', folderId: 'f-gs-polity', front: 'Writ of Mandamus', back: 'Judicial writ issued by Supreme Court (Art 32) or High Court (Art 226) commanding a public official to perform a mandatory public duty.', marathi: 'परमादेश ("आम्ही आदेश देतो")', synTrap: '⚠️ Cannot be issued against President, Governor, or private individuals', hint: 'Literally means "We Command"', tags: ['PYQ', 'Trap'], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: true, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null },
+        { id: 'p4', folderId: 'f-gs-polity', front: '73rd Constitutional Amendment Act (1992)', back: 'Granted constitutional status to Panchayati Raj Institutions (Part IX) and added the 11th Schedule with 29 subjects.', marathi: 'पंचायती राज व्यवस्था (२९ विषय)', synTrap: '⚠️ Don\'t confuse with 74th Amendment (Municipalities - 18 subjects)', hint: 'Rural Local Government (3-Tier)', tags: ['PYQ'], box: 2, nextReview: Date.now() - 1000, status: 'learning', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null }
+      ]
+    };
+
+    const STORAGE_KEY = 'recallpro_v2_data';
+    const THEME_KEY = 'recallpro_v6_theme';
+    const AI_KEY_STORAGE = 'recallpro_gemini_api_key';
+
+    let appData = DEFAULT_DATA;
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && Array.isArray(saved.folders) && Array.isArray(saved.cards)) appData = saved;
+    } catch (e) {}
+
+    appData.folders.forEach(f => { if (!f.icon) f.icon = f.parentId ? '📂' : '📁'; });
+    appData.cards.forEach(c => {
+      if (typeof c.mistakeCount !== 'number') c.mistakeCount = 0;
+      if (typeof c.box !== 'number') c.box = c.status === 'mastered' ? 4 : (c.status === 'learning' ? 2 : 1);
+      if (typeof c.nextReview !== 'number') c.nextReview = c.box > 2 ? Date.now() + DAY_MS : Date.now() - 1000;
+      if (!Array.isArray(c.tags)) c.tags = [];
+      if (!c.marathi) c.marathi = '';
+      if (!c.synTrap) c.synTrap = '';
+      if (!c.imgFit) c.imgFit = 'cover';
+    });
+
+    let activeFolderId = appData.folders[0]?.id || null;
+    let includeSubfolders = true;
+    let activeMode = 'flashcards';
+    let currentCardIndex = 0;
+    let isFlipped = false;
+    let isHintVisible = false;
+    let isPeekActive = false;
+    let blurFrontPic = false;
+    let clozeActive = false;
+    let reverseCardDir = false;
+    let starredOnly = false;
+    let dueOnly = false;
+    let activeTagFilter = '';
+    let searchQuery = '';
+    let sheetCoverAnswers = true;
+
+    let tempCardImageData = null;
+    let modalActiveTags = new Set();
+    let selectedCardIds = new Set();
+    let autoPlayTimer = null;
+    let speedCramInterval = null;
+    let speedCramRemaining = 80;
+
+    let yptSession = { cardsReviewed: 0, mcqsSolved: 0, mcqsCorrect: 0 };
+    let examQuestions = [], examCurrentIndex = 0, examTimerInterval = null, examSecondsElapsed = 0;
+    let examSetSeed = 1;
+    let examConfig = { negMark: 0.25, feedbackMode: 'instant' };
+    let matchSelectedTile = null, matchTimerInterval = null, matchStartTime = 0, matchRemainingPairs = 0;
+    let currentTypeCard = null;
+
+    function saveToStorage() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); } catch (e) {} }
+    function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+    function formatWithCloze(text) {
+      let safe = escapeHtml(text);
+      if (!clozeActive) return safe.replace(/\[([^\]]+)\]/g, '<span class="underline decoration-indigo-400 font-extrabold">$1</span>');
+      safe = safe.replace(/\[([^\]]+)\]/g, '<span class="cloze-pill" onclick="event.stopPropagation(); this.classList.toggle(\'revealed\')">$1</span>');
+      safe = safe.replace(/\b(1[5-9]\d{2}|20[0-2]\d|Article\s*\d+[A-Z]?)\b/gi, '<span class="cloze-pill" onclick="event.stopPropagation(); this.classList.toggle(\'revealed\')">$1</span>');
+      return safe;
+    }
+
+    const THEMES = ['aurora', 'matcha', 'rose', 'daylight'];
+    const THEME_LABELS = { aurora: '🌌 Aurora', matcha: '☕ Matcha', rose: '🌸 Rose', daylight: '☀️ Daylight' };
+    let currentTheme = localStorage.getItem(THEME_KEY) || 'aurora';
+    if (!THEMES.includes(currentTheme)) currentTheme = 'aurora';
+
+    function applyTheme(t) {
+      currentTheme = t; localStorage.setItem(THEME_KEY, t);
+      document.documentElement.className = `theme-${t}`;
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) btn.textContent = THEME_LABELS[t];
+    }
+    function cycleTheme() { applyTheme(THEMES[(THEMES.indexOf(currentTheme) + 1) % THEMES.length]); }
+
+    function updateYptUI() {
+      document.getElementById('yptSessionSummary').textContent = `${yptSession.cardsReviewed} Cards · ${yptSession.mcqsSolved} MCQs`;
+      document.getElementById('yptModalCards').textContent = yptSession.cardsReviewed;
+      document.getElementById('yptModalMcqs').textContent = yptSession.mcqsSolved;
+      document.getElementById('yptModalAccuracy').textContent = yptSession.mcqsSolved ? Math.round((yptSession.mcqsCorrect / yptSession.mcqsSolved) * 100) + '%' : '--%';
+    }
+    function resetYptSession() { yptSession = { cardsReviewed: 0, mcqsSolved: 0, mcqsCorrect: 0 }; updateYptUI(); }
+
+    // ==================== GEMINI AI ENGINE ====================
+    async function callGeminiSmart(promptText, overrideKey = null) {
+      const apiKey = (overrideKey || localStorage.getItem(AI_KEY_STORAGE) || '').trim();
+      if (!apiKey) throw new Error('NO_KEY');
+      let models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+        if (r.ok) {
+          const d = await r.json();
+          const found = (d.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent')).map(m => m.name.replace('models/', '')).filter(n => n.includes('gemini') && !n.includes('image') && !n.includes('tts'));
+          models = [...new Set([...found.filter(n => n.includes('flash')), ...models, ...found])];
+        }
+      } catch (e) {}
+      let lastErr = 'Check API Key';
+      for (const m of models) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+          });
+          const data = await res.json();
+          if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) return { text: data.candidates[0].content.parts[0].text, model: m };
+          if (data?.error?.message) lastErr = data.error.message;
+        } catch (err) { lastErr = err.message; }
+      }
+      throw new Error(lastErr);
+    }
+
+    function saveAiApiKey() { localStorage.setItem(AI_KEY_STORAGE, document.getElementById('inputGeminiApiKey').value.trim()); closeModal('aiModal'); }
+    async function testGeminiKey() {
+      const key = document.getElementById('inputGeminiApiKey').value.trim(), st = document.getElementById('aiKeyTestStatus');
+      st.classList.remove('hidden');
+      if (!key) { st.className = 'p-2.5 rounded-xl text-xs bg-rose-500/20 text-rose-400'; st.textContent = 'Paste key first.'; return; }
+      st.className = 'p-2.5 rounded-xl text-xs bg-violet-500/20 text-violet-400'; st.textContent = '⚡ Testing...';
+      try {
+        const res = await callGeminiSmart('Say OK', key);
+        localStorage.setItem(AI_KEY_STORAGE, key);
+        st.className = 'p-2.5 rounded-xl text-xs bg-emerald-500/20 text-emerald-500'; st.textContent = `✅ Connected (${res.model})!`;
+      } catch (e) { st.className = 'p-2.5 rounded-xl text-xs bg-rose-500/20 text-rose-400'; st.textContent = `❌ Error: ${e.message}`; }
+    }
+
+    function getSmartTrapExplanation(correctCard, wrongText, customExp = null) {
+      if (customExp) return `<div class="space-y-1"><div class="font-bold text-emerald-500">✅ Exam Explanation:</div><div class="text-main whitespace-pre-line">${escapeHtml(customExp)}</div></div>`;
+      if (!correctCard) return '';
+      const dist = appData.cards.find(c => c.id !== correctCard.id && (c.front === wrongText || c.back === wrongText));
+      let h = `<div class="space-y-1"><div class="font-bold text-emerald-500">✅ Correct (${escapeHtml(correctCard.front)}): ${escapeHtml(correctCard.back)}</div>`;
+      if (correctCard.marathi) h += `<div class="text-amber-500 font-bold">🇮🇳 ${escapeHtml(correctCard.marathi)}</div>`;
+      if (correctCard.synTrap) h += `<div class="text-rose-400 font-semibold">${escapeHtml(correctCard.synTrap)}</div>`;
+      if (correctCard.hint) h += `<div class="text-indigo-400">💡 Hint: ${escapeHtml(correctCard.hint)}</div>`;
+      if (dist) h += `<div class="pt-1.5 mt-1.5 border-t border-slate-500/20 text-rose-500"><strong>⚠️ Trap Alert:</strong> Your pick belongs to <strong>"${escapeHtml(dist.front)}"</strong> (${escapeHtml(dist.back)}).</div>`;
+      return h + `</div>`;
+    }
+
+    async function requestGeminiExplanationById(cardId, domId, customStem = '') {
+      const card = appData.cards.find(c => c.id === cardId), box = document.getElementById(domId);
+      if (!box) return;
+      box.classList.remove('hidden');
+      if (!localStorage.getItem(AI_KEY_STORAGE)) {
+        box.innerHTML = `<div class="flex items-center justify-between gap-2"><span>✨ Save your Gemini key in <strong>✨ AI Key</strong> at the top first!</span><button type="button" onclick="openModal('aiModal')" class="px-3 py-1 rounded-lg bg-violet-600 text-white font-bold">Setup Key</button></div>`;
+        return;
+      }
+      box.innerHTML = `<div class="text-violet-400 font-bold animate-pulse">✨ AI analyzing question...</div>`;
+      try {
+        const prompt = card
+          ? `Exam tutor breakdown for "${card.front}" = "${card.back}". ${card.lastWrongText ? `Student picked "${card.lastWrongText}".` : ''} Give 3 short bullets: 1. Core Meaning + Marathi meaning, 2. Trap difference, 3. Memory Trick.`
+          : `Explain this exam MCQ concisely in 3 bullets:\n${customStem}`;
+        const r = await callGeminiSmart(prompt);
+        if (card) { card.aiExplanation = r.text; saveToStorage(); }
+        box.innerHTML = `<div class="font-bold text-violet-400 mb-1">✨ AI Tutor (${escapeHtml(r.model)}):</div><div class="whitespace-pre-line">${escapeHtml(r.text)}</div>`;
+      } catch (e) { box.innerHTML = `<div class="text-rose-500">AI Error: ${escapeHtml(e.message)}</div>`; }
+    }
+
+    function explainCurrentCardWithAi() { const c = getFilteredCards(); if (c.length) requestGeminiExplanationById(c[currentCardIndex].id, 'flashcardAiBox'); }
+
+    async function generateHintForModalWithAi() {
+      const f = document.getElementById('inputCardFront').value.trim(), b = document.getElementById('inputCardBack').value.trim(), inp = document.getElementById('inputCardHint');
+      if (!f || !b) { alert('Enter Front & Back first!'); return; }
+      inp.value = '✨ Generating...';
+      try {
+        const r = await callGeminiSmart(`Give a 1-line memory trick (max 10 words) to remember "${f}" means "${b}". Reply ONLY with the hint.`);
+        inp.value = r.text.trim();
+      } catch (e) { inp.value = ''; openModal('aiModal'); }
+    }
+
+    // ==================== FOLDERS & SPACED REPETITION ====================
+    function isCardDueToday(card) { return (card.nextReview || 0) <= Date.now() || (card.box || 1) === 1; }
+    function formatDueStatus(card) {
+      if (isCardDueToday(card)) return '📅 Due Today';
+      const days = Math.max(1, Math.ceil((card.nextReview - Date.now()) / DAY_MS));
+      return `⏳ Due in ${days}d`;
+    }
+
+    function getFolderById(id) { return appData.folders.find(f => f.id === id); }
+    function getChildFolders(pid) { return appData.folders.filter(f => f.parentId === pid); }
+    function getDescendantFolderIds(fid) { let ids = [fid]; getChildFolders(fid).forEach(ch => { ids = ids.concat(getDescendantFolderIds(ch.id)); }); return ids; }
+    function getRootSubjectFolderId(fid) { let c = getFolderById(fid); while (c && c.parentId) { const p = getFolderById(c.parentId); if (!p) break; c = p; } return c ? c.id : fid; }
+    function getBreadcrumbPath(fid) { const p = []; let c = getFolderById(fid); while (c) { p.unshift(c); c = c.parentId ? getFolderById(c.parentId) : null; } return p; }
+    function getCardsForFolder(fid, inc = true) { if (!fid) return appData.cards; const ids = inc ? getDescendantFolderIds(fid) : [fid]; return appData.cards.filter(c => ids.includes(c.folderId)); }
+
+    function getFilteredCards() {
+      let list = [...getCardsForFolder(activeFolderId, includeSubfolders)];
+      if (dueOnly) list = list.filter(c => isCardDueToday(c));
+      if (starredOnly) list = list.filter(c => c.starred);
+      if (activeTagFilter) list = list.filter(c => Array.isArray(c.tags) && c.tags.includes(activeTagFilter));
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(c => c.front.toLowerCase().includes(q) || c.back.toLowerCase().includes(q) || (c.marathi && c.marathi.toLowerCase().includes(q)) || (c.hint && c.hint.toLowerCase().includes(q)));
+      }
+      return list;
+    }
+
+    function populateFolderDropdown(selectId, defaultFolderId) {
+      const sel = document.getElementById(selectId); if (!sel) return;
+      const target = defaultFolderId || activeFolderId || appData.folders[0]?.id;
+      sel.innerHTML = appData.folders.map(f => {
+        const path = getBreadcrumbPath(f.id).map(p => `${p.icon || '📁'} ${p.name}`).join(' › ');
+        return `<option value="${f.id}" ${f.id === target ? 'selected' : ''}>${escapeHtml(path)}</option>`;
+      }).join('');
+    }
+
+    function buildFolderTreeHtml(pid = null, d = 0) {
+      return getChildFolders(pid).map(f => {
+        const act = f.id === activeFolderId, cnt = getCardsForFolder(f.id, true).length;
+        const ic = f.icon || (d === 0 ? '📁' : '📂');
+        return `<div style="margin-left:${d * 12}px" class="space-y-1">
+          <div onclick="selectFolder('${f.id}')" class="cursor-pointer px-3 py-2 rounded-2xl border text-xs sm:text-sm flex items-center justify-between gap-1 transition ${act ? 'btn-accent font-extrabold shadow-md' : 'sub-glass text-main hover:opacity-90'}">
+            <span class="truncate">${ic} ${escapeHtml(f.name)}</span>
+            <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-black/20 font-bold">${cnt}</span>
+              <button type="button" onclick="openCardModal(null, '${f.id}')" class="w-6 h-6 rounded-lg bg-black/25 hover:bg-black/50 font-extrabold text-xs flex items-center justify-center text-white">+</button>
+            </div>
+          </div>${buildFolderTreeHtml(f.id, d + 1)}</div>`;
+      }).join('');
+    }
+
+    // ==================== RENDER WORKSPACE ====================
+    function renderAll() {
+      if (!getFolderById(activeFolderId) && appData.folders.length) activeFolderId = appData.folders[0].id;
+      const th = buildFolderTreeHtml(null, 0);
+      document.getElementById('desktopFolderTree').innerHTML = th;
+      document.getElementById('mobileFolderTree').innerHTML = th;
+
+      const folder = getFolderById(activeFolderId);
+      const sc = getCardsForFolder(activeFolderId, includeSubfolders);
+      const dueInScope = sc.filter(c => isCardDueToday(c)).length;
+
+      document.getElementById('dueBtnCount').textContent = dueInScope;
+      document.getElementById('dueSidebarCount').textContent = `${dueInScope} Due Today`;
+
+      if (folder) {
+        const path = getBreadcrumbPath(activeFolderId);
+        document.getElementById('folderBreadcrumb').innerHTML = path.map((n, i) => `<button type="button" onclick="selectFolder('${n.id}')" class="hover:underline">${n.icon || '📁'} ${escapeHtml(n.name)}</button>${i < path.length - 1 ? '<span class="opacity-60">›</span>' : ''}`).join('');
+        document.getElementById('activeFolderTitle').textContent = `${folder.icon || '📁'} ${folder.name}`;
+        document.getElementById('activeFolderCount').textContent = `${sc.length} cards`;
+
+        const ch = getChildFolders(activeFolderId), pb = document.getElementById('subfolderPillsContainer');
+        if (ch.length) {
+          pb.classList.remove('hidden');
+          document.getElementById('subfolderPillsList').innerHTML = `<span class="text-[11px] font-bold text-sub">Subfolders:</span>` + ch.map(c => `
+            <div class="inline-flex items-center rounded-xl btn-soft overflow-hidden text-xs font-bold shadow-sm">
+              <button type="button" onclick="selectFolder('${c.id}')" class="px-2.5 py-1 hover:opacity-80">${c.icon || '📂'} ${escapeHtml(c.name)} (${getCardsForFolder(c.id, true).length})</button>
+              <button type="button" onclick="openCardModal(null, '${c.id}')" class="px-2 py-1 bg-indigo-500/20 text-indigo-400 font-extrabold border-l border-slate-500/20">+</button>
+            </div>`).join('');
+        } else pb.classList.add('hidden');
+
+        const bCounts = [0, 0, 0, 0, 0, 0];
+        let readinessSum = 0;
+        sc.forEach(c => {
+          const b = Math.min(5, Math.max(1, c.box || 1));
+          bCounts[b]++;
+          readinessSum += (b - 1) * 25;
+        });
+        for (let i = 1; i <= 5; i++) document.getElementById(`box${i}Cnt`).textContent = bCounts[i];
+
+        const readinessPct = sc.length ? Math.round(readinessSum / sc.length) : 0;
+        document.getElementById('readinessBadge').textContent = `${readinessPct}%`;
+
+        const total = sc.length || 1;
+        const m = bCounts[4] + bCounts[5], l = bCounts[2] + bCounts[3], n = bCounts[1];
+        document.getElementById('barMastered').style.width = `${(m / total) * 100}%`;
+        document.getElementById('barLearning').style.width = `${(l / total) * 100}%`;
+        document.getElementById('barNew').style.width = `${(n / total) * 100}%`;
+      }
+
+      const mc = appData.cards.filter(c => (c.mistakeCount || 0) > 0).length, mb = document.getElementById('mistakeTabBadge');
+      mb.textContent = mc; mb.classList.toggle('hidden', mc === 0);
+
+      document.getElementById('btnFilterDue').className = dueOnly
+        ? 'px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-400 border border-amber-500/40 font-extrabold'
+        : 'px-2.5 py-1 rounded-lg btn-soft font-bold';
+      document.getElementById('btnFilterStarred').className = starredOnly
+        ? 'px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-400 border border-amber-500/40 font-extrabold'
+        : 'px-2.5 py-1 rounded-lg btn-soft font-semibold';
+
+      const isEmpty = sc.length === 0 && activeMode === 'flashcards';
+      document.getElementById('emptyFolderLaunchpad').classList.toggle('hidden', !isEmpty);
+      if (isEmpty && folder) document.getElementById('emptyFolderNameTitle').textContent = `"${folder.name}" is Ready for Cards!`;
+      document.getElementById('view-flashcards').classList.toggle('hidden', isEmpty || activeMode !== 'flashcards');
+
+      renderActiveFlashcard();
+      renderCheatSheetTable();
+      renderMistakeNotebook();
+      renderDeckCardsTable();
+      updateModeTabs();
+      updateYptUI();
+    }
+
+    // ==================== NON-INVERTING FLASHCARD RENDERER ====================
+    function renderActiveFlashcard() {
+      const cards = getFilteredCards();
+      const frontFace = document.getElementById('cardFrontFace');
+      const backFace  = document.getElementById('cardBackFace');
+      document.getElementById('flashcardAiBox').classList.add('hidden');
+
+      // Physical visibility swap guarantees Front & Back NEVER mix or invert on iPad Safari!
+      frontFace.classList.toggle('hidden', isFlipped);
+      backFace.classList.toggle('hidden', !isFlipped);
+      frontFace.classList.toggle('peek-active', isPeekActive);
+      backFace.classList.toggle('peek-active', isPeekActive);
+
+      if (!cards.length) {
+        frontFace.classList.remove('has-bg-image');
+        backFace.classList.remove('has-bg-image');
+        document.getElementById('frontBgImgLayer').classList.add('hidden');
+        document.getElementById('backBgImgLayer').classList.add('hidden');
+        document.getElementById('cardFrontText').textContent = 'No cards match your active filter.';
+        document.getElementById('cardBackText').textContent = 'Clear your filter or add a card!';
+        document.getElementById('cardProgressCounter').textContent = '0 / 0';
+        return;
+      }
+
+      if (currentCardIndex >= cards.length) currentCardIndex = 0;
+      const card = cards[currentCardIndex];
+      const fFolder = getFolderById(card.folderId);
+      const boxNum = card.box || 1;
+
+      document.getElementById('cardFolderBadge').textContent = fFolder ? `${fFolder.icon || '📁'} ${fFolder.name}` : 'Folder';
+      document.getElementById('cardBoxBadge').textContent = `Box ${boxNum}`;
+      document.getElementById('cardDueText').textContent = formatDueStatus(card);
+
+      const nextGoodBox = Math.min(5, boxNum + 1);
+      const nextEasyBox = Math.min(5, boxNum + 2);
+      document.getElementById('goodNextInterval').textContent = `Box ${nextGoodBox} · ${BOX_DAYS[nextGoodBox]}d`;
+      document.getElementById('easyNextInterval').textContent = `Box ${nextEasyBox} · ${BOX_DAYS[nextEasyBox]}d`;
+
+      const tagColors = { PYQ: 'bg-rose-500/25 text-rose-300', Trap: 'bg-amber-500/25 text-amber-300', Shortcut: 'bg-emerald-500/25 text-emerald-300' };
+      document.getElementById('cardTagsFront').innerHTML = (card.tags || []).map(t => `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${tagColors[t] || 'btn-soft'}">${t === 'PYQ' ? '🔥 PYQ' : (t === 'Trap' ? '⚠️ Trap' : '⚡ Trick')}</span>`).join('');
+
+      const hasFrontImg = Boolean(card.image && (card.imageSide === 'both' || card.imageSide === 'front'));
+      const hasBackImg  = Boolean(card.image && (card.imageSide === 'both' || card.imageSide === 'back'));
+      const fitMode = card.imgFit === 'contain' ? 'contain' : 'cover';
+
+      frontFace.classList.toggle('has-bg-image', hasFrontImg);
+      backFace.classList.toggle('has-bg-image', hasBackImg);
+
+      const fLayer = document.getElementById('frontBgImgLayer'), fBackdrop = document.getElementById('frontBlurBackdrop'), fScrim = document.getElementById('frontBgScrim');
+      if (hasFrontImg) {
+        fLayer.style.backgroundImage = `url(${card.image})`;
+        fLayer.style.backgroundSize = fitMode;
+        fLayer.style.filter = blurFrontPic ? 'blur(14px)' : 'none';
+        fLayer.classList.remove('hidden'); fScrim.classList.remove('hidden');
+        if (fitMode === 'contain') { fBackdrop.style.backgroundImage = `url(${card.image})`; fBackdrop.classList.remove('hidden'); } else fBackdrop.classList.add('hidden');
+      } else { fLayer.classList.add('hidden'); fBackdrop.classList.add('hidden'); fScrim.classList.add('hidden'); }
+
+      const bLayer = document.getElementById('backBgImgLayer'), bBackdrop = document.getElementById('backBlurBackdrop'), bScrim = document.getElementById('backBgScrim');
+      if (hasBackImg) {
+        bLayer.style.backgroundImage = `url(${card.image})`;
+        bLayer.style.backgroundSize = fitMode;
+        bLayer.classList.remove('hidden'); bScrim.classList.remove('hidden');
+        if (fitMode === 'contain') { bBackdrop.style.backgroundImage = `url(${card.image})`; bBackdrop.classList.remove('hidden'); } else bBackdrop.classList.add('hidden');
+      } else { bLayer.classList.add('hidden'); bBackdrop.classList.add('hidden'); bScrim.classList.add('hidden'); }
+
+      ['btnPeekFront', 'btnFitFront', 'btnBlurFront'].forEach(id => document.getElementById(id).classList.toggle('hidden', !hasFrontImg));
+      document.getElementById('btnPeekBack').classList.toggle('hidden', !hasBackImg);
+      document.getElementById('btnFitFront').textContent = fitMode === 'contain' ? '🗺️ Fit' : '🖼️ Fill';
+      document.getElementById('btnBlurFront').textContent = blurFrontPic ? '👀 Unblur' : '🙈 Blur';
+
+      const frontRaw = reverseCardDir ? card.back : card.front;
+      const backRaw  = reverseCardDir ? card.front : card.back;
+      document.getElementById('cardFrontText').innerHTML = formatWithCloze(frontRaw);
+      document.getElementById('cardBackText').innerHTML  = formatWithCloze(backRaw);
+
+      const marBox = document.getElementById('cardMarathiBox');
+      if (card.marathi) { marBox.textContent = `🇮🇳 ${card.marathi}`; marBox.classList.remove('hidden'); } else marBox.classList.add('hidden');
+
+      const trapBox = document.getElementById('cardSynTrapBox');
+      if (card.synTrap) { trapBox.textContent = card.synTrap; trapBox.classList.remove('hidden'); } else trapBox.classList.add('hidden');
+
+      const pct = Math.round(((currentCardIndex + 1) / cards.length) * 100);
+      document.getElementById('cardTopProgressFill').style.width = `${pct}%`;
+
+      const hb = document.getElementById('cardHintBox'), hBtn = document.getElementById('btnToggleHint');
+      if (card.hint) {
+        hBtn.innerHTML = isHintVisible ? '🙈 Hide' : '💡 Hint';
+        document.getElementById('cardHintText').textContent = `💡 ${card.hint}`;
+        hb.classList.toggle('hidden', !isHintVisible);
+      } else { hBtn.innerHTML = '💡 +Hint'; hb.classList.add('hidden'); }
+
+      document.getElementById('starBtnFront').textContent = card.starred ? '⭐' : '☆';
+      document.getElementById('starBtnBack').textContent  = card.starred ? '⭐ Starred' : '⭐ Star';
+      document.getElementById('cardProgressCounter').textContent = `${currentCardIndex + 1} / ${cards.length}`;
+    }
+
+    // 2-Stage Smooth Flip: folds to 88deg, swaps visibility, and unfolds to 0deg (zero inversion!)
+    function flipCard() {
+      const stage = document.getElementById('flashcardStage');
+      isPeekActive = false;
+      stage.classList.add('flip-fold');
+      setTimeout(() => {
+        isFlipped = !isFlipped;
+        if (isFlipped) { yptSession.cardsReviewed++; updateYptUI(); }
+        renderActiveFlashcard();
+        stage.classList.remove('flip-fold');
+      }, 135);
+    }
+
+    function togglePeekImage() { isPeekActive = !isPeekActive; renderActiveFlashcard(); }
+    function toggleCardImgFit() {
+      const cards = getFilteredCards(); if (!cards.length) return;
+      const c = cards[currentCardIndex]; c.imgFit = c.imgFit === 'contain' ? 'cover' : 'contain';
+      saveToStorage(); renderActiveFlashcard();
+    }
+    function toggleFrontBlur() { blurFrontPic = !blurFrontPic; renderActiveFlashcard(); }
+    function toggleClozeMode() {
+      clozeActive = !clozeActive;
+      document.getElementById('btnClozeToggle').textContent = clozeActive ? '🧩 Cloze: ON' : '🧩 Cloze: OFF';
+      document.getElementById('btnClozeToggle').className = clozeActive ? 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-extrabold' : 'px-2.5 py-1 rounded-lg btn-soft font-bold';
+      renderActiveFlashcard();
+    }
+
+    // ==================== 8-SECOND SPEED CRAM ====================
+    function stopSpeedCram() {
+      if (speedCramInterval) { clearInterval(speedCramInterval); speedCramInterval = null; }
+      document.getElementById('speedCramFill').classList.add('hidden');
+      const btn = document.getElementById('btnSpeedCram');
+      if (btn) { btn.textContent = '⏱️ 8s Speed'; btn.className = 'px-2.5 py-2 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/30 text-xs font-extrabold'; }
+    }
+    function toggleSpeedCram() {
+      if (speedCramInterval) { stopSpeedCram(); return; }
+      const cards = getFilteredCards(); if (!cards.length) return;
+      const btn = document.getElementById('btnSpeedCram');
+      btn.textContent = '⏹ Stop 8s'; btn.className = 'px-2.5 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-extrabold shadow';
+      document.getElementById('speedCramFill').classList.remove('hidden');
+      resetSpeedCramTick();
+      speedCramInterval = setInterval(() => {
+        speedCramRemaining--;
+        document.getElementById('speedCramFill').style.width = `${(speedCramRemaining / 80) * 100}%`;
+        if (speedCramRemaining <= 0) {
+          if (!isFlipped) { flipCard(); speedCramRemaining = 50; }
+          else { nextCard(); resetSpeedCramTick(); }
+        }
+      }, 100);
+    }
+    function resetSpeedCramTick() { speedCramRemaining = 80; document.getElementById('speedCramFill').style.width = '100%'; }
+
+    // ==================== CHEAT-SHEET TABLE VIEW ====================
+    function renderCheatSheetTable() {
+      const tbody = document.getElementById('cheatSheetTableBody'); if (!tbody) return;
+      const cards = getFilteredCards();
+      tbody.parentElement.classList.toggle('cover-answers', sheetCoverAnswers);
+      if (!cards.length) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-sub">No cards in current filter.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = cards.map(c => `
+        <tr class="hover:bg-white/5">
+          <td class="py-3 px-3 font-extrabold text-main align-top">
+            <div>${escapeHtml(c.front)}</div>
+            <div class="flex gap-1 mt-1">${(c.tags || []).map(t => `<span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-400">${t}</span>`).join('')}</div>
+          </td>
+          <td class="py-3 px-3 align-top sheet-ans" onclick="this.classList.toggle('revealed')">
+            <div class="font-semibold text-main">${escapeHtml(c.back)}</div>
+            ${c.marathi ? `<div class="text-xs text-amber-500 font-bold mt-0.5">🇮🇳 ${escapeHtml(c.marathi)}</div>` : ''}
+            ${c.synTrap ? `<div class="text-xs text-rose-400 font-semibold mt-0.5">${escapeHtml(c.synTrap)}</div>` : ''}
+            ${c.hint ? `<div class="text-[11px] text-indigo-400 mt-0.5">💡 ${escapeHtml(c.hint)}</div>` : ''}
+          </td>
+          <td class="py-3 px-2 text-center align-top font-extrabold text-xs text-indigo-400">B${c.box || 1}</td>
+        </tr>`).join('');
+    }
+    function toggleSheetCover() {
+      sheetCoverAnswers = !sheetCoverAnswers;
+      document.getElementById('btnCoverSheet').textContent = sheetCoverAnswers ? '👀 Show All Answers' : '🙈 Cover Answers (Test Yourself)';
+      renderCheatSheetTable();
+    }
+
+    // ==================== IMAGE PASTE & UPLOAD ====================
+    async function pasteImageFromClipboard() {
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.read) { alert('Tap inside any box in this window and tap "Paste" above your iPad keyboard!'); return; }
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          const imgType = item.types.find(t => t.startsWith('image/'));
+          if (imgType) { compressImageBlob(await item.getType(imgType)); return; }
+        }
+        alert('No image found on clipboard! Copy an image from Safari or Photos first.');
+      } catch (e) { alert('Tap inside any box in this window and tap "Paste" on your iPad keyboard!'); }
+    }
+    window.addEventListener('paste', e => {
+      const items = e.clipboardData?.items; if (!items) return;
+      for (const item of items) { if (item.type.startsWith('image/')) { e.preventDefault(); compressImageBlob(item.getAsFile()); break; } }
+    });
+    function compressImageBlob(fileOrBlob) {
+      if (!fileOrBlob) return;
+      const r = new FileReader();
+      r.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas'), MAX = 650;
+          let w = img.width, h = img.height; if (w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
+          c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+          tempCardImageData = c.toDataURL('image/jpeg', 0.8);
+          document.getElementById('imagePreviewThumb').src = tempCardImageData;
+          document.getElementById('imagePreviewWrapper').classList.remove('hidden');
+        };
+        img.src = ev.target.result;
+      };
+      r.readAsDataURL(fileOrBlob);
+    }
+    function handleImageUpload(e) { compressImageBlob(e.target.files[0]); }
+    function clearAttachedImage() { tempCardImageData = null; document.getElementById('inputCardImageFile').value = ''; document.getElementById('imagePreviewWrapper').classList.add('hidden'); }
+
+    // ==================== SPACED REPETITION RATING ====================
+    function rateCurrentCard(st) {
+      const cards = getFilteredCards(); if (!cards.length) return;
+      const c = cards[currentCardIndex], curBox = c.box || 1;
+      if (st === 'new') { c.box = 1; c.nextReview = Date.now() - 1000; c.status = 'new'; c.mistakeCount = (c.mistakeCount || 0) + 1; }
+      else if (st === 'learning') { c.box = Math.min(5, curBox + 1); c.nextReview = Date.now() + BOX_DAYS[c.box] * DAY_MS; c.status = c.box >= 4 ? 'mastered' : 'learning'; }
+      else if (st === 'mastered') { c.box = Math.min(5, curBox + 2); c.nextReview = Date.now() + BOX_DAYS[c.box] * DAY_MS; c.status = 'mastered'; c.mistakeCount = 0; }
+      saveToStorage(); renderAll(); nextCard();
+    }
+
+    function nextCard() {
+      const c = getFilteredCards(); if (!c.length) return;
+      isFlipped = false; isHintVisible = false; isPeekActive = false;
+      if (speedCramInterval) resetSpeedCramTick();
+      currentCardIndex = (currentCardIndex + 1) % c.length;
+      renderActiveFlashcard();
+    }
+    function prevCard() {
+      const c = getFilteredCards(); if (!c.length) return;
+      isFlipped = false; isHintVisible = false; isPeekActive = false;
+      if (speedCramInterval) resetSpeedCramTick();
+      currentCardIndex = (currentCardIndex - 1 + c.length) % c.length;
+      renderActiveFlashcard();
+    }
+
+    function toggleReverseCards() { reverseCardDir = !reverseCardDir; document.getElementById('btnReverseToggle').textContent = reverseCardDir ? '🔄 Def→Term' : '🔄 Term→Def'; isFlipped = false; renderActiveFlashcard(); }
+    function toggleDueFilter() { dueOnly = !dueOnly; currentCardIndex = 0; renderAll(); }
+    function toggleStarredFilter() { starredOnly = !starredOnly; currentCardIndex = 0; renderAll(); }
+    function setTagFilter(val) { activeTagFilter = val; currentCardIndex = 0; renderAll(); }
+    function shuffleActiveCards() { appData.cards.sort(() => Math.random() - 0.5); currentCardIndex = 0; isFlipped = false; renderAll(); }
+    function toggleStarCurrentCard() { const c = getFilteredCards(); if (!c.length) return; c[currentCardIndex].starred = !c[currentCardIndex].starred; saveToStorage(); renderAll(); }
+    function toggleStarById(id) { const c = appData.cards.find(x => x.id === id); if (c) { c.starred = !c.starred; saveToStorage(); renderAll(); } }
+
+    function speakCurrentSide(s) {
+      if (!('speechSynthesis' in window)) return;
+      const c = getFilteredCards(); if (!c.length) return;
+      const card = c[currentCardIndex];
+      const txt = (s === 'front') ? (reverseCardDir ? card.back : card.front) : (reverseCardDir ? card.front : card.back);
+      window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(txt.replace(/\[|\]/g, '')));
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayTimer) { clearTimeout(autoPlayTimer); autoPlayTimer = null; }
+      const btn = document.getElementById('btnAutoPlay');
+      if (btn) { btn.textContent = '🎧 Audio'; btn.className = 'px-2.5 py-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 text-xs font-extrabold'; }
+    }
+    function toggleAutoPlayAudio() {
+      if (autoPlayTimer) { stopAutoPlay(); return; }
+      const cards = getFilteredCards(); if (!cards.length) return;
+      const btn = document.getElementById('btnAutoPlay');
+      btn.textContent = '⏹ Stop'; btn.className = 'px-2.5 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow';
+      runAutoPlayStep();
+    }
+    function runAutoPlayStep() {
+      const cards = getFilteredCards(); if (!cards.length) { stopAutoPlay(); return; }
+      isFlipped = false; renderActiveFlashcard(); speakCurrentSide('front');
+      autoPlayTimer = setTimeout(() => {
+        isFlipped = true; renderActiveFlashcard(); speakCurrentSide('back');
+        autoPlayTimer = setTimeout(() => { currentCardIndex = (currentCardIndex + 1) % cards.length; runAutoPlayStep(); }, 3800);
+      }, 3500);
+    }
+
+    // ==================== TYPE TEST & MISTAKE BOOK ====================
+    function maskWordForHint(word) { return String(word || '').split('').map((ch, idx) => (ch === ' ' || ch === '-' || idx === 0 || idx === word.length - 1 || idx % 3 === 0) ? ch : '_').join(' '); }
+    function loadNextTypeCard() {
+      const pool = getFilteredCards(), fb = document.getElementById('typeFeedbackBox');
+      fb.classList.add('hidden'); document.getElementById('typeAnswerInput').value = '';
+      if (!pool.length) { document.getElementById('typePromptText').textContent = 'No cards in current filter.'; return; }
+      currentTypeCard = pool[Math.floor(Math.random() * pool.length)];
+      document.getElementById('typePromptText').textContent = currentTypeCard.back.replace(/\[|\]/g, '');
+      const mClue = document.getElementById('typeMarathiClue');
+      if (currentTypeCard.marathi) { mClue.textContent = `🇮🇳 ${currentTypeCard.marathi}`; mClue.classList.remove('hidden'); } else mClue.classList.add('hidden');
+      document.getElementById('typeMaskHint').textContent = maskWordForHint(currentTypeCard.front);
+      document.getElementById('typeStarBtn').textContent = currentTypeCard.starred ? '⭐ Starred' : '⭐ Star Word';
+    }
+    function toggleStarTypeCard() { if (!currentTypeCard) return; currentTypeCard.starred = !currentTypeCard.starred; saveToStorage(); renderAll(); }
+    function checkTypedAnswer() {
+      if (!currentTypeCard) return;
+      const val = document.getElementById('typeAnswerInput').value.trim().toLowerCase(), target = currentTypeCard.front.trim().toLowerCase(), fb = document.getElementById('typeFeedbackBox');
+      fb.classList.remove('hidden');
+      if (val && (val === target || (target.includes(val) && val.length >= 4))) {
+        currentTypeCard.box = Math.min(5, (currentTypeCard.box || 1) + 1);
+        currentTypeCard.nextReview = Date.now() + BOX_DAYS[currentTypeCard.box] * DAY_MS;
+        currentTypeCard.status = 'mastered';
+        yptSession.cardsReviewed++; updateYptUI(); saveToStorage();
+        fb.className = 'p-4 rounded-2xl text-xs sm:text-sm font-extrabold bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 flex items-center justify-between';
+        fb.innerHTML = `<span>✅ Spot On! Moved to Box ${currentTypeCard.box}.</span><button type="button" onclick="loadNextTypeCard()" class="px-3 py-1 rounded-xl bg-emerald-600 text-white">Next →</button>`;
+      } else {
+        fb.className = 'p-4 rounded-2xl text-xs sm:text-sm font-extrabold bg-rose-500/20 text-rose-500 border border-rose-500/40';
+        fb.textContent = `❌ Not quite! Check the letter mask or tap Reveal.`;
+      }
+    }
+    function revealTypedAnswer() {
+      if (!currentTypeCard) return;
+      document.getElementById('typeAnswerInput').value = currentTypeCard.front;
+      const fb = document.getElementById('typeFeedbackBox'); fb.classList.remove('hidden');
+      fb.className = 'p-4 rounded-2xl text-xs sm:text-sm font-extrabold bg-amber-500/20 text-amber-500 border border-amber-500/40 flex items-center justify-between';
+      fb.innerHTML = `<span>💡 Answer: "${escapeHtml(currentTypeCard.front)}"</span><button type="button" onclick="loadNextTypeCard()" class="px-3 py-1 rounded-xl btn-accent">Next →</button>`;
+    }
+
+    function toggleHintVisibility() {
+      const cards = getFilteredCards(); if (!cards.length) return;
+      if (!cards[currentCardIndex].hint) { quickEditCardHint(); return; }
+      isHintVisible = !isHintVisible; renderActiveFlashcard();
+    }
+    function quickEditCardHint() {
+      const cards = getFilteredCards(); if (!cards.length) return;
+      const card = cards[currentCardIndex];
+      const h = prompt(`Enter memory hint for "${card.front}":`, card.hint || '');
+      if (h !== null) { card.hint = h.trim(); isHintVisible = Boolean(card.hint); saveToStorage(); renderAll(); }
+    }
+
+    function renderMistakeNotebook() {
+      const m = appData.cards.filter(c => (c.mistakeCount || 0) > 0).sort((a, b) => b.mistakeCount - a.mistakeCount);
+      const el = document.getElementById('mistakeNotebookList');
+      if (!m.length) { el.innerHTML = `<div class="text-center py-10 text-xs text-sub">🎉 Mistake Book is empty!</div>`; return; }
+      el.innerHTML = m.map(c => `<div class="p-4 rounded-2xl sub-glass border-rose-500/30 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-500 text-xs font-extrabold">❌ Missed ${c.mistakeCount}x · Box ${c.box || 1}</span>
+          <div class="flex gap-2">
+            <button type="button" onclick="requestGeminiExplanationById('${c.id}', 'm-ai-${c.id}')" class="px-2.5 py-1 rounded-lg bg-violet-500/20 text-violet-400 text-xs font-bold">✨ AI Explain</button>
+            <button type="button" onclick="resolveMistakeCard('${c.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-500 text-xs font-bold">✓ Mastered</button>
+          </div>
+        </div>
+        <div class="font-extrabold text-sm text-main">${escapeHtml(c.front)}</div>
+        <div class="text-xs text-emerald-500 font-bold">✓ Correct: ${escapeHtml(c.back)}</div>
+        ${c.marathi ? `<div class="text-xs text-amber-500 font-bold">🇮🇳 ${escapeHtml(c.marathi)}</div>` : ''}
+        ${c.lastWrongText ? `<div class="text-xs text-rose-500">⚠️ Last Wrong Pick: "${escapeHtml(c.lastWrongText)}"</div>` : ''}
+        <div id="m-ai-${c.id}" class="${c.aiExplanation ? '' : 'hidden'} p-3 rounded-xl panel-glass text-xs whitespace-pre-line">${escapeHtml(c.aiExplanation || '')}</div>
+      </div>`).join('');
+    }
+    function resolveMistakeCard(id) { const c = appData.cards.find(x => x.id === id); if (c) { c.mistakeCount = 0; c.box = 4; c.nextReview = Date.now() + 7 * DAY_MS; c.status = 'mastered'; saveToStorage(); renderAll(); } }
+    function clearAllMistakes() { if (confirm('Clear Mistake Book?')) { appData.cards.forEach(c => c.mistakeCount = 0); saveToStorage(); renderAll(); } }
+
+    function renderDeckCardsTable() {
+      const cards = getFilteredCards();
+      document.getElementById('cardTableCount').textContent = cards.length;
+      const el = document.getElementById('deckCardsList');
+      const bulkBar = document.getElementById('bulkActionToolbar');
+      bulkBar.classList.toggle('hidden', selectedCardIds.size === 0);
+      if (selectedCardIds.size > 0) {
+        document.getElementById('selectedCardsCount').textContent = selectedCardIds.size;
+        populateFolderDropdown('bulkMoveTargetSelect', activeFolderId);
+      }
+      if (!cards.length) { el.innerHTML = `<div class="text-center py-4 text-xs text-sub">No cards in current filter.</div>`; return; }
+      el.innerHTML = cards.map(c => {
+        const fd = getFolderById(c.folderId);
+        const checked = selectedCardIds.has(c.id) ? 'checked' : '';
+        return `<div class="p-3 rounded-2xl sub-glass flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <input type="checkbox" ${checked} onchange="toggleSelectCard('${c.id}', this.checked)" class="rounded w-4 h-4 accent-indigo-600 shrink-0" />
+            ${c.image ? `<img src="${c.image}" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-white/15" />` : ''}
+            <div class="truncate">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-extrabold text-xs sm:text-sm text-main truncate">${escapeHtml(c.front)}</span>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-indigo-500/20 text-indigo-400 font-extrabold">B${c.box || 1}</span>
+                <span class="text-[10px] px-2 py-0.2 rounded-full btn-soft font-bold">${fd ? escapeHtml(fd.name) : ''}</span>
+              </div>
+              <div class="text-xs text-sub truncate">${escapeHtml(c.back)} ${c.marathi ? `· 🇮🇳 ${escapeHtml(c.marathi)}` : ''}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="toggleStarById('${c.id}')" class="px-2 py-1 rounded-lg btn-soft text-xs font-bold">${c.starred ? '⭐' : '☆'}</button>
+            <button type="button" onclick="openCardModal('${c.id}')" class="px-2 py-1 rounded-lg btn-soft text-xs font-bold">✎</button>
+            <button type="button" onclick="deleteCard('${c.id}')" class="px-2 py-1 rounded-lg bg-rose-500/15 text-rose-500 text-xs font-bold">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function toggleSelectCard(id, ch) { if (ch) selectedCardIds.add(id); else selectedCardIds.delete(id); renderDeckCardsTable(); }
+    function toggleSelectAllCards(ch) { const cards = getFilteredCards(); if (ch) cards.forEach(c => selectedCardIds.add(c.id)); else selectedCardIds.clear(); renderDeckCardsTable(); }
+    function moveSelectedCardsToFolder() {
+      const targetFid = document.getElementById('bulkMoveTargetSelect').value; if (!targetFid) return;
+      appData.cards.forEach(c => { if (selectedCardIds.has(c.id)) c.folderId = targetFid; });
+      selectedCardIds.clear(); document.getElementById('selectAllCardsCheck').checked = false; saveToStorage(); renderAll();
+    }
+    function deleteSelectedCards() {
+      if (!confirm(`Delete ${selectedCardIds.size} selected cards?`)) return;
+      appData.cards = appData.cards.filter(c => !selectedCardIds.has(c.id));
+      selectedCardIds.clear(); document.getElementById('selectAllCardsCheck').checked = false; saveToStorage(); renderAll();
+    }
+
+    // ==================== FOLDER & CARD MODALS ====================
+    function selectFolder(id) {
+      stopAutoPlay(); stopSpeedCram();
+      activeFolderId = id; currentCardIndex = 0; isFlipped = false; isHintVisible = false; isPeekActive = false;
+      selectedCardIds.clear(); closeMobileSidebar(); renderAll();
+      if (activeMode === 'type') loadNextTypeCard();
+      if (activeMode === 'exam') showExamSetup();
+      if (activeMode === 'match') startMatchGame();
+    }
+    function toggleMobileSidebar() {
+      const b = document.getElementById('mobileSidebarBackdrop'), d = document.getElementById('mobileSidebarDrawer'), h = !b.classList.contains('hidden');
+      b.classList.toggle('hidden', h); d.classList.toggle('-translate-x-full', h);
+    }
+    function closeMobileSidebar() {
+      document.getElementById('mobileSidebarBackdrop').classList.add('hidden');
+      document.getElementById('mobileSidebarDrawer').classList.add('-translate-x-full');
+    }
+
+    function openFolderModal(pid = null) {
+      document.getElementById('folderEditModeInput').value = 'create';
+      document.getElementById('folderParentIdInput').value = pid || '';
+      document.getElementById('inputFolderName').value = '';
+      document.getElementById('inputFolderIcon').value = pid ? '📂' : '📁';
+      const p = pid ? getFolderById(pid) : null;
+      document.getElementById('folderModalTitle').textContent = p ? 'Create Subfolder' : 'Create Main Folder';
+      document.getElementById('folderParentNotice').textContent = p ? `Creating inside: ${p.icon || '📁'} ${p.name}` : 'Creating Top-Level Subject Folder';
+      openModal('folderModal');
+    }
+    function openRenameFolderModal() {
+      const f = getFolderById(activeFolderId); if (!f) return;
+      document.getElementById('folderEditModeInput').value = 'rename';
+      document.getElementById('inputFolderName').value = f.name;
+      document.getElementById('inputFolderIcon').value = f.icon || '📁';
+      document.getElementById('folderModalTitle').textContent = 'Rename Folder';
+      document.getElementById('folderParentNotice').textContent = `Editing: ${f.name}`;
+      openModal('folderModal');
+    }
+    function saveFolderModal() {
+      const name = document.getElementById('inputFolderName').value.trim(), icon = document.getElementById('inputFolderIcon').value || '📁';
+      if (!name) return;
+      if (document.getElementById('folderEditModeInput').value === 'rename') {
+        const f = getFolderById(activeFolderId); if (f) { f.name = name; f.icon = icon; }
+      } else {
+        const pid = document.getElementById('folderParentIdInput').value || null;
+        const nf = { id: 'f-' + Date.now(), name, icon, parentId: pid };
+        appData.folders.push(nf); activeFolderId = nf.id;
+      }
+      closeModal('folderModal'); closeMobileSidebar(); saveToStorage(); renderAll();
+    }
+    function deleteActiveFolder() {
+      if (appData.folders.length <= 1) { alert('Keep at least 1 folder.'); return; }
+      const f = getFolderById(activeFolderId); if (!f || !confirm(`Delete "${f.name}" and its cards?`)) return;
+      const ids = getDescendantFolderIds(activeFolderId);
+      appData.folders = appData.folders.filter(x => !ids.includes(x.id));
+      appData.cards = appData.cards.filter(x => !ids.includes(x.folderId));
+      activeFolderId = f.parentId || appData.folders[0]?.id; saveToStorage(); renderAll();
+    }
+    function toggleIncludeSubfolders() {
+      includeSubfolders = document.getElementById('includeSubfoldersToggle').checked;
+      document.getElementById('subfoldersScopeHint').textContent = includeSubfolders ? 'ON' : 'OFF';
+      currentCardIndex = 0; renderAll();
+    }
+
+    function toggleModalTag(tag) {
+      if (modalActiveTags.has(tag)) modalActiveTags.delete(tag); else modalActiveTags.add(tag);
+      updateModalTagButtons();
+    }
+    function updateModalTagButtons() {
+      ['PYQ', 'Trap', 'Shortcut'].forEach(t => {
+        const b = document.getElementById(`tagBtn-${t}`); if (!b) return;
+        b.className = modalActiveTags.has(t)
+          ? 'flex-1 py-2 rounded-xl btn-accent text-[11px] font-extrabold shadow'
+          : 'flex-1 py-2 rounded-xl btn-soft text-[11px] font-extrabold';
+      });
+    }
+
+    function openCardModal(cid = null, forceFolderId = null) {
+      const c = cid ? appData.cards.find(x => x.id === cid) : null;
+      document.getElementById('cardModalTitle').textContent = c ? 'Edit Flashcard' : 'Add Flashcard';
+      document.getElementById('editCardId').value = c ? c.id : '';
+      document.getElementById('inputCardFront').value = c ? c.front : '';
+      document.getElementById('inputCardBack').value = c ? c.back : '';
+      document.getElementById('inputCardMarathi').value = c?.marathi || '';
+      document.getElementById('inputCardSynTrap').value = c?.synTrap || '';
+      document.getElementById('inputCardHint').value = c?.hint || '';
+      document.getElementById('inputCardImageSide').value = c?.imageSide || 'both';
+      modalActiveTags = new Set(c?.tags || []);
+      updateModalTagButtons();
+      populateFolderDropdown('inputCardFolderSelect', c ? c.folderId : (forceFolderId || activeFolderId));
+      if (c && c.image) { tempCardImageData = c.image; document.getElementById('imagePreviewThumb').src = c.image; document.getElementById('imagePreviewWrapper').classList.remove('hidden'); } else clearAttachedImage();
+      openModal('cardModal');
+    }
+    function editCurrentCard() { const c = getFilteredCards(); if (c.length) openCardModal(c[currentCardIndex].id); }
+    function saveCard() {
+      const front = document.getElementById('inputCardFront').value.trim(), back = document.getElementById('inputCardBack').value.trim();
+      const marathi = document.getElementById('inputCardMarathi').value.trim(), synTrap = document.getElementById('inputCardSynTrap').value.trim();
+      const hint = document.getElementById('inputCardHint').value.trim(), folderId = document.getElementById('inputCardFolderSelect').value || activeFolderId;
+      const imageSide = document.getElementById('inputCardImageSide').value, editId = document.getElementById('editCardId').value;
+      if (!front || !back) return;
+      if (editId) {
+        const c = appData.cards.find(x => x.id === editId);
+        if (c) { c.front = front; c.back = back; c.marathi = marathi; c.synTrap = synTrap; c.hint = hint; c.tags = Array.from(modalActiveTags); c.folderId = folderId; c.image = tempCardImageData; c.imageSide = imageSide; }
+      } else {
+        appData.cards.push({ id: 'c-' + Date.now(), folderId, front, back, marathi, synTrap, hint, tags: Array.from(modalActiveTags), box: 1, nextReview: Date.now() - 1000, status: 'new', starred: false, image: tempCardImageData, imageSide, imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null });
+        activeFolderId = folderId;
+      }
+      closeModal('cardModal'); saveToStorage(); renderAll();
+    }
+    function deleteCard(id) { if (confirm('Delete card?')) { appData.cards = appData.cards.filter(c => c.id !== id); saveToStorage(); renderAll(); } }
+
+    function openBulkModal(forceFolderId = null) { populateFolderDropdown('bulkTargetFolderSelect', forceFolderId || activeFolderId); openModal('importModal'); }
+    function processBulkImport() {
+      const raw = document.getElementById('bulkImportText').value.trim(), targetFid = document.getElementById('bulkTargetFolderSelect').value || activeFolderId;
+      if (!raw) return;
+      raw.split('\n').forEach((line, i) => {
+        const parts = line.includes('|') ? line.split('|') : line.split(' - ');
+        if (parts.length >= 2) {
+          const front = parts[0].trim(), back = parts[1].trim(), hint = (parts[2] || '').trim(), marathi = (parts[3] || '').trim();
+          if (front && back) appData.cards.push({ id: `imp-${Date.now()}-${i}`, folderId: targetFid, front, back, marathi, synTrap: '', hint, tags: [], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null });
+        }
+      });
+      activeFolderId = targetFid; document.getElementById('bulkImportText').value = ''; closeModal('importModal'); saveToStorage(); renderAll();
+    }
+
+    function openAiGenModal(forceFolderId = null) { populateFolderDropdown('aiGenFolderSelect', forceFolderId || activeFolderId); openModal('aiGenModal'); }
+    async function generateCardsWithAi() {
+      const topic = document.getElementById('aiGenTopicInput').value.trim(), count = document.getElementById('aiGenCountSelect').value, targetFid = document.getElementById('aiGenFolderSelect').value || activeFolderId, st = document.getElementById('aiGenStatus');
+      if (!topic) return;
+      st.classList.remove('hidden'); st.className = 'p-2.5 rounded-xl text-xs bg-fuchsia-500/20 text-fuchsia-400'; st.textContent = `✨ Extracting ${count} cards...`;
+      try {
+        const r = await callGeminiSmart(`Create ${count} high-yield competitive exam flashcards from this topic/notes: "${topic}". Format each line strictly as 4 parts separated by " | ": Term/Question | English Answer | Short Memory Hint | Marathi Meaning & Synonym. Output ONLY the lines.`);
+        let added = 0;
+        r.text.split('\n').forEach((l, i) => {
+          const p = l.replace(/^\d+[\.\)]\s*/, '').split('|');
+          if (p.length >= 2 && p[0].trim() && p[1].trim()) {
+            appData.cards.push({ id: `ai-${Date.now()}-${i}`, folderId: targetFid, front: p[0].trim(), back: p[1].trim(), hint: (p[2] || '').trim(), marathi: (p[3] || '').trim(), synTrap: '', tags: ['PYQ'], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: false, image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: null });
+            added++;
+          }
+        });
+        activeFolderId = targetFid; saveToStorage(); renderAll();
+        st.className = 'p-2.5 rounded-xl text-xs bg-emerald-500/20 text-emerald-500'; st.textContent = `✅ Added ${added} cards!`;
+        setTimeout(() => { closeModal('aiGenModal'); st.classList.add('hidden'); }, 900);
+      } catch (e) { st.className = 'p-2.5 rounded-xl text-xs bg-rose-500/20 text-rose-500'; st.textContent = `Error: ${e.message}`; }
+    }
+
+    // ==================== ADVANCED MULTI-PATTERN EXAM ENGINE (6 PATTERNS + AI EXAM SETTER) ====================
+    function setExamCount(val) {
+      const poolLen = getCardsForFolder(activeFolderId, includeSubfolders).length || 15;
+      document.getElementById('examCustomCountInput').value = val === 999 ? poolLen : val;
+    }
+
+    function showExamSetup() {
+      clearInterval(examTimerInterval);
+      document.getElementById('examSetupPanel').classList.remove('hidden');
+      document.getElementById('examActivePanel').classList.add('hidden');
+      document.getElementById('examResultPanel').classList.add('hidden');
+    }
+
+    // Builds 1 exam question using any of the 5 built-in competitive exam patterns
+    function buildSingleExamQuestion(card, idx, subjectPool, patternChoice) {
+      const cleanBack = s => String(s || '').replace(/\[|\]/g, '');
+      const others = subjectPool.filter(c => c.id !== card.id).sort(() => Math.random() - 0.5);
+      const patterns = ['statement', 'match_pairs', 'incorrect_pair', 'def_to_term', 'term_to_def'];
+      const chosenPattern = patternChoice === 'exam_mix'
+        ? patterns[(idx + examSetSeed) % patterns.length]
+        : patternChoice;
+
+      // PATTERN 1: UPSC / MPSC MULTI-STATEMENT QUESTION (1 only, 2 only, Both, Neither)
+      if (chosenPattern === 'statement' && others.length >= 2) {
+        const partner = others[0];
+        const foil = others[1];
+        const variant = (idx + examSetSeed) % 4; // 0=Both true, 1=Only 1 true, 2=Only 2 true, 3=Neither true
+        const st1True = (variant === 0 || variant === 1);
+        const st2True = (variant === 0 || variant === 2);
+
+        const s1Text = st1True ? `${card.front}: ${cleanBack(card.back)}` : `${card.front}: ${cleanBack(foil.back)}`;
+        const s2Text = st2True ? `${partner.front}: ${cleanBack(partner.back)}` : `${partner.front}: ${cleanBack(card.back)}`;
+        const correctId = variant === 0 ? 'both' : (variant === 1 ? 'only1' : (variant === 2 ? 'only2' : 'neither'));
+
+        return {
+          cardId: card.id, hint: card.hint || '', showHint: false,
+          typeLabel: '📜 Multi-Statement Exam MCQ',
+          prompt: `Consider the following statements:\n1. ${s1Text}\n2. ${s2Text}\n\nWhich of the statements given above is/are correct?`,
+          image: card.image,
+          options: [
+            { id: 'only1', text: '1 only' },
+            { id: 'only2', text: '2 only' },
+            { id: 'both', text: 'Both 1 and 2' },
+            { id: 'neither', text: 'Neither 1 nor 2' }
+          ],
+          correctOptionId: correctId,
+          explanation: `Statement 1 is ${st1True ? 'CORRECT' : 'INCORRECT'} (${card.front} = ${cleanBack(card.back)}).\nStatement 2 is ${st2True ? 'CORRECT' : 'INCORRECT'} (${partner.front} = ${cleanBack(partner.back)}).`,
+          selectedOptionId: null, loggedToYpt: false
+        };
+      }
+
+      // PATTERN 2: MATCH THE FOLLOWING PAIRS (List-I vs List-II)
+      if (chosenPattern === 'match_pairs' && others.length >= 2) {
+        const trio = [card, others[0], others[1]];
+        const meanings = [
+          { num: 1, text: cleanBack(trio[1].back) },
+          { num: 2, text: cleanBack(trio[2].back) },
+          { num: 3, text: cleanBack(trio[0].back) }
+        ];
+        return {
+          cardId: card.id, hint: card.hint || '', showHint: false,
+          typeLabel: '🔗 Match the Following (List-I & II)',
+          prompt: `Match List-I with List-II and select the correct code:\nA. ${trio[0].front}   —   1. ${meanings[0].text}\nB. ${trio[1].front}   —   2. ${meanings[1].text}\nC. ${trio[2].front}   —   3. ${meanings[2].text}`,
+          image: null,
+          options: [
+            { id: 'c_right', text: 'A-3, B-1, C-2' },
+            { id: 'c_w1',    text: 'A-1, B-2, C-3' },
+            { id: 'c_w2',    text: 'A-2, B-3, C-1' },
+            { id: 'c_w3',    text: 'A-3, B-2, C-1' }
+          ].sort(() => Math.random() - 0.5),
+          correctOptionId: 'c_right',
+          explanation: `Correct Matching:\n• ${trio[0].front} → ${cleanBack(trio[0].back)}\n• ${trio[1].front} → ${cleanBack(trio[1].back)}\n• ${trio[2].front} → ${cleanBack(trio[2].back)}`,
+          selectedOptionId: null, loggedToYpt: false
+        };
+      }
+
+      // PATTERN 3: SPOT THE INCORRECT PAIR (Odd One Out Trap)
+      if (chosenPattern === 'incorrect_pair' && others.length >= 3) {
+        const cA = others[0], cB = others[1], cC = others[2];
+        const opts = [
+          { id: card.id, text: `${card.front} — ${cleanBack(cC.back)}` }, // FALSE / SWAPPED PAIR!
+          { id: cA.id,   text: `${cA.front} — ${cleanBack(cA.back)}` },
+          { id: cB.id,   text: `${cB.front} — ${cleanBack(cB.back)}` },
+          { id: cC.id,   text: `${cC.front} — ${cleanBack(cC.back)}` }
+        ].sort(() => Math.random() - 0.5);
+
+        return {
+          cardId: card.id, hint: card.hint || '', showHint: false,
+          typeLabel: '⚠️ Spot the INCORRECT Pair',
+          prompt: `Which one of the following pairs is INCORRECTLY matched?`,
+          image: null,
+          options: opts,
+          correctOptionId: card.id,
+          explanation: `The pair "${card.front}" was wrongly matched with "${cleanBack(cC.back)}".\nActual meaning of ${card.front}: ${cleanBack(card.back)}.`,
+          selectedOptionId: null, loggedToYpt: false
+        };
+      }
+
+      // PATTERN 4 & 5: OWS REVERSE OR STANDARD DIRECT MCQ
+      const isRev = chosenPattern === 'def_to_term';
+      const opts = [card, ...others.slice(0, 3)].sort(() => Math.random() - 0.5);
+      return {
+        cardId: card.id, hint: card.hint || '', showHint: false,
+        typeLabel: isRev ? '🧠 OWS / Reverse Exam MCQ' : '📖 Standard Concept MCQ',
+        prompt: isRev ? `Which word/term best fits the following description?\n"${cleanBack(card.back)}"` : `Choose the most accurate meaning/statement for:\n"${card.front}"`,
+        image: card.image,
+        options: opts.map(o => ({ id: o.id, text: isRev ? o.front : cleanBack(o.back) })),
+        correctOptionId: card.id,
+        explanation: null,
+        selectedOptionId: null, loggedToYpt: false
+      };
+    }
+
+    function startMockExam(forceMistakes = false, bumpSeed = false) {
+      if (forceMistakes) setStudyMode('exam');
+      if (bumpSeed) {
+        examSetSeed++;
+        document.getElementById('examSetSeedBadge').textContent = `Set #${examSetSeed}`;
+      }
+
+      const srcVal = forceMistakes ? 'mistakes_only' : document.getElementById('examSourceSelect').value;
+      const folderScope = getCardsForFolder(activeFolderId, includeSubfolders);
+      let pool = srcVal === 'mistakes_only' ? appData.cards.filter(c => (c.mistakeCount || 0) > 0)
+               : srcVal === 'starred_only' ? folderScope.filter(c => c.starred)
+               : srcVal === 'due_only' ? folderScope.filter(c => isCardDueToday(c))
+               : folderScope;
+
+      if (!pool.length) { alert('No cards match your selected source!'); return; }
+
+      const rootId = getRootSubjectFolderId(activeFolderId);
+      const subjectPool = getCardsForFolder(rootId, true);
+      if (subjectPool.length < 2) { alert('Add at least 2 cards in this subject first.'); return; }
+
+      const pattern = document.getElementById('examPatternSelect').value;
+      const requestedCount = Math.max(1, parseInt(document.getElementById('examCustomCountInput').value, 10) || 15);
+      examConfig.negMark = parseFloat(document.getElementById('examNegativeSelect').value);
+      examConfig.feedbackMode = document.getElementById('examFeedbackModeSelect').value;
+
+      // Build exact requested number of questions (cycles with fresh framing if requestedCount > pool.length)
+      const selectedCards = [];
+      let bag = [...pool].sort(() => Math.random() - 0.5);
+      while (selectedCards.length < Math.min(requestedCount, 100)) {
+        if (!bag.length) bag = [...pool].sort(() => Math.random() - 0.5);
+        selectedCards.push(bag.shift());
+        if (selectedCards.length >= pool.length && requestedCount >= 999) break;
+      }
+
+      examQuestions = selectedCards.map((card, idx) => buildSingleExamQuestion(card, idx, subjectPool.length >= 4 ? subjectPool : appData.cards, pattern));
+
+      launchExamHallView();
+    }
+
+    // ==================== ✨ LIVE GEMINI AI EXAM PAPER GENERATOR ====================
+    async function generateAiFreshExamPaper() {
+      const apiKey = (localStorage.getItem(AI_KEY_STORAGE) || '').trim();
+      if (!apiKey) { openModal('aiModal'); return; }
+
+      const folderScope = getCardsForFolder(activeFolderId, includeSubfolders);
+      if (!folderScope.length) { alert('Add cards to this folder first!'); return; }
+
+      const requestedCount = Math.min(15, Math.max(3, parseInt(document.getElementById('examCustomCountInput').value, 10) || 8));
+      const pattern = document.getElementById('examPatternSelect').value;
+      examConfig.negMark = parseFloat(document.getElementById('examNegativeSelect').value);
+      examConfig.feedbackMode = document.getElementById('examFeedbackModeSelect').value;
+
+      const statusBox = document.getElementById('aiExamGenStatus');
+      statusBox.classList.remove('hidden');
+      statusBox.textContent = `✨ Gemini AI is framing ${requestedCount} fresh, exam-level MCQs (Set #${++examSetSeed})...`;
+
+      const sampleFacts = [...folderScope].sort(() => Math.random() - 0.5).slice(0, 18)
+        .map(c => `• ${c.front}: ${c.back} ${c.synTrap ? `(${c.synTrap})` : ''}`).join('\n');
+
+      const prompt = `You are a senior competitive exam paper setter (UPSC/MPSC/SSC level).
+Based on these study notes/cards:
+${sampleFacts}
+
+Create ${requestedCount} brand-new, high-yield exam MCQs (Seed #${examSetSeed}).
+Include a mix of Multi-Statement questions, Odd-Pair traps, and conceptual/vocabulary application questions (${pattern}).
+Return ONLY a valid JSON array (no markdown fences) where each object has:
+{"typeLabel":"Exam Pattern Name","prompt":"Full question stem","options":["Option A","Option B","Option C","Option D"],"correctIndex":0,"explanation":"Crisp explanation of why correct and why others are traps","frontSummary":"Short Term/Topic","backSummary":"Key takeaway fact"}`;
+
+      try {
+        const res = await callGeminiSmart(prompt);
+        const rawJson = res.text.replace(/```json|```/gi, '').trim();
+        const parsed = JSON.parse(rawJson);
+        if (!Array.isArray(parsed) || !parsed.length) throw new Error('Invalid AI JSON format');
+
+        examQuestions = parsed.map((item, idx) => {
+          const opts = (item.options || []).slice(0, 4).map((txt, oIdx) => ({ id: `ai_opt_${oIdx}`, text: String(txt) }));
+          const cIdx = typeof item.correctIndex === 'number' ? item.correctIndex : 0;
+          return {
+            cardId: null,
+            aiGenerated: true,
+            frontSummary: item.frontSummary || `AI Exam Q${idx + 1}`,
+            backSummary: item.backSummary || item.explanation || '',
+            hint: '', showHint: false,
+            typeLabel: `✨ ${item.typeLabel || 'AI Exam MCQ'}`,
+            prompt: String(item.prompt || ''),
+            image: null,
+            options: opts,
+            correctOptionId: `ai_opt_${cIdx}`,
+            explanation: item.explanation || '',
+            selectedOptionId: null, loggedToYpt: false
+          };
+        });
+
+        statusBox.classList.add('hidden');
+        launchExamHallView();
+      } catch (e) {
+        statusBox.textContent = `⚠️ AI Paper Error (${e.message}) — Launching Built-In Smart Exam Engine instead...`;
+        setTimeout(() => { statusBox.classList.add('hidden'); startMockExam(false, true); }, 1400);
+      }
+    }
+
+    function saveAiQuestionToDeck(qIdx) {
+      const q = examQuestions[qIdx]; if (!q) return;
+      const rightOpt = q.options.find(o => o.id === q.correctOptionId);
+      appData.cards.push({
+        id: 'aiq-' + Date.now(),
+        folderId: activeFolderId,
+        front: q.frontSummary || q.prompt.slice(0, 80),
+        back: `${rightOpt ? rightOpt.text : ''} — ${q.explanation || ''}`,
+        marathi: '', synTrap: '', hint: 'Saved from AI Exam Hall',
+        tags: ['PYQ'], box: 1, nextReview: Date.now() - 1000, status: 'new', starred: true,
+        image: null, imageSide: 'both', imgFit: 'cover', mistakeCount: 0, lastWrongText: null, aiExplanation: q.explanation
+      });
+      saveToStorage();
+      alert('✅ Question saved as a starred card in your current folder!');
+    }
+
+    function launchExamHallView() {
+      examCurrentIndex = 0; examSecondsElapsed = 0;
+      document.getElementById('examSetupPanel').classList.add('hidden');
+      document.getElementById('examResultPanel').classList.add('hidden');
+      document.getElementById('examActivePanel').classList.remove('hidden');
+      clearInterval(examTimerInterval);
+      examTimerInterval = setInterval(() => {
+        examSecondsElapsed++;
+        document.getElementById('examTimerDisplay').textContent = `${String(Math.floor(examSecondsElapsed / 60)).padStart(2, '0')}:${String(examSecondsElapsed % 60).padStart(2, '0')}`;
+      }, 1000);
+      renderExamQuestion();
+    }
+
+    function toggleExamQuestionHint() { const q = examQuestions[examCurrentIndex]; if (!q || !q.hint) { alert('No hint on this question.'); return; } q.showHint = !q.showHint; renderExamQuestion(); }
+    function toggleStarExamQuestion() {
+      const q = examQuestions[examCurrentIndex]; if (!q) return;
+      if (q.aiGenerated) { saveAiQuestionToDeck(examCurrentIndex); return; }
+      const card = appData.cards.find(c => c.id === q.cardId);
+      if (card) { card.starred = !card.starred; saveToStorage(); renderExamQuestion(); renderAll(); }
+    }
+
+    function renderExamQuestion() {
+      const q = examQuestions[examCurrentIndex]; if (!q) return;
+      document.getElementById('examQCounter').textContent = `Q. ${examCurrentIndex + 1} / ${examQuestions.length}`;
+      document.getElementById('examQuestionTypeTag').textContent = q.typeLabel;
+      document.getElementById('examQuestionStem').textContent = q.prompt;
+      const card = q.cardId ? appData.cards.find(c => c.id === q.cardId) : null;
+      document.getElementById('examStarBtn').textContent = q.aiGenerated ? '➕ Save Card' : (card?.starred ? '⭐ Starred' : '⭐ Star');
+
+      const hb = document.getElementById('examQuestionHintBox');
+      if (q.hint && q.showHint) { hb.textContent = `💡 Hint: ${q.hint}`; hb.classList.remove('hidden'); } else hb.classList.add('hidden');
+      const img = document.getElementById('examQuestionImage');
+      if (q.image) { img.src = q.image; img.classList.remove('hidden'); } else img.classList.add('hidden');
+
+      const letters = ['A', 'B', 'C', 'D'];
+      document.getElementById('examOptionsGrid').innerHTML = q.options.map((opt, i) => {
+        const sel = q.selectedOptionId === opt.id;
+        let cls = 'sub-glass text-main';
+        if (examConfig.feedbackMode === 'instant' && q.selectedOptionId) {
+          if (opt.id === q.correctOptionId) cls = 'bg-emerald-500/20 border-emerald-500 text-emerald-500 font-extrabold';
+          else if (sel) cls = 'bg-rose-500/20 border-rose-500 text-rose-500 font-extrabold';
+        } else if (sel) cls = 'btn-accent font-extrabold';
+        return `<button type="button" onclick="selectExamOption('${opt.id}')" class="p-3.5 rounded-2xl border text-left text-xs sm:text-sm flex items-start gap-3 ${cls}">
+          <span class="w-6 h-6 rounded-lg bg-black/20 text-xs font-extrabold flex items-center justify-center shrink-0">${letters[i]}</span>
+          <span>${escapeHtml(opt.text)}</span></button>`;
+      }).join('');
+
+      const tb = document.getElementById('examInstantTutorBox');
+      if (examConfig.feedbackMode === 'instant' && q.selectedOptionId) {
+        tb.classList.remove('hidden');
+        const chosen = q.options.find(o => o.id === q.selectedOptionId);
+        if (q.selectedOptionId === q.correctOptionId) {
+          tb.className = 'p-3.5 rounded-2xl border bg-emerald-500/10 border-emerald-500/30 space-y-1.5 text-xs';
+          tb.innerHTML = `<strong class="text-emerald-500">✓ Spot On! (+1.0)</strong>${q.explanation ? `<div class="text-sub whitespace-pre-line">${escapeHtml(q.explanation)}</div>` : ''}`;
+        } else {
+          tb.className = 'p-3.5 rounded-2xl border bg-rose-500/10 border-rose-500/40 space-y-2 text-xs';
+          tb.innerHTML = `<div class="flex items-center justify-between"><strong class="text-rose-500">✕ Incorrect — Logged for Review</strong><button type="button" onclick="requestGeminiExplanationById('${q.cardId || ''}', 'instantAiSubBox', '${escapeHtml(q.prompt)}')" class="px-2.5 py-1 rounded-lg bg-violet-600 text-white font-bold">✨ AI Deep Explain</button></div>${getSmartTrapExplanation(card, chosen?.text || '', q.explanation)}<div id="instantAiSubBox" class="hidden pt-2 border-t border-slate-500/20 whitespace-pre-line"></div>`;
+        }
+      } else tb.classList.add('hidden');
+      document.getElementById('examPaletteGrid').innerHTML = examQuestions.map((x, idx) => `<button type="button" onclick="goExamQuestion(${idx})" class="w-7 h-7 rounded-lg text-xs font-extrabold ${x.selectedOptionId ? 'bg-emerald-600 text-white' : 'btn-soft'} ${idx === examCurrentIndex ? 'ring-2 ring-indigo-400' : ''}">${idx + 1}</button>`).join('');
+    }
+
+    function selectExamOption(optId) {
+      const q = examQuestions[examCurrentIndex]; q.selectedOptionId = optId;
+      const card = q.cardId ? appData.cards.find(c => c.id === q.cardId) : null;
+      const chosen = q.options.find(o => o.id === optId);
+      if (!q.loggedToYpt) { q.loggedToYpt = true; yptSession.mcqsSolved++; if (optId === q.correctOptionId) yptSession.mcqsCorrect++; updateYptUI(); }
+      if (examConfig.feedbackMode === 'instant' && card) {
+        if (optId !== q.correctOptionId) { card.mistakeCount = (card.mistakeCount || 0) + 1; card.box = 1; card.nextReview = Date.now() - 1000; card.lastWrongText = chosen?.text || null; card.status = 'new'; }
+        else { card.box = Math.min(5, (card.box || 1) + 1); card.nextReview = Date.now() + BOX_DAYS[card.box] * DAY_MS; card.status = 'mastered'; }
+        saveToStorage();
+      }
+      renderExamQuestion();
+    }
+    function goExamQuestion(idx) { if (idx >= 0 && idx < examQuestions.length) { examCurrentIndex = idx; renderExamQuestion(); } }
+
+    function submitMockExam() {
+      clearInterval(examTimerInterval);
+      let cor = 0, wrg = 0, skp = 0;
+      examQuestions.forEach(q => {
+        const card = q.cardId ? appData.cards.find(c => c.id === q.cardId) : null;
+        const chosen = q.options.find(o => o.id === q.selectedOptionId);
+        if (!q.selectedOptionId) skp++;
+        else if (q.selectedOptionId === q.correctOptionId) { cor++; if (card) { card.box = Math.min(5, (card.box || 1) + 1); card.status = 'mastered'; } }
+        else { wrg++; if (card && examConfig.feedbackMode !== 'instant') { card.mistakeCount = (card.mistakeCount || 0) + 1; card.box = 1; card.lastWrongText = chosen?.text || null; card.status = 'new'; } }
+      });
+      document.getElementById('examActivePanel').classList.add('hidden');
+      document.getElementById('examResultPanel').classList.remove('hidden');
+      document.getElementById('examFinalScoreText').textContent = `Score: ${(cor - wrg * examConfig.negMark).toFixed(2)} / ${examQuestions.length}`;
+      document.getElementById('examFinalSummarySub').textContent = `✅ ${cor} Correct · ❌ ${wrg} Wrong · ⚪ ${skp} Skipped · Set #${examSetSeed}`;
+      document.getElementById('examSolutionsList').innerHTML = examQuestions.map((q, i) => {
+        const card = q.cardId ? appData.cards.find(c => c.id === q.cardId) : null;
+        const chosen = q.options.find(o => o.id === q.selectedOptionId), rightOpt = q.options.find(o => o.id === q.correctOptionId), ok = q.selectedOptionId === q.correctOptionId;
+        return `<div class="p-3.5 rounded-2xl sub-glass border ${ok ? 'border-emerald-500/40' : 'border-rose-500/40'} space-y-2 text-xs">
+          <div class="flex justify-between gap-2"><span class="font-extrabold text-main whitespace-pre-line">Q${i + 1} (${escapeHtml(q.typeLabel)}):\n${escapeHtml(q.prompt)}</span>
+            <div class="flex gap-1 shrink-0">
+              ${q.aiGenerated ? `<button type="button" onclick="saveAiQuestionToDeck(${i})" class="px-2 py-1 rounded bg-indigo-600 text-white font-bold">➕ Save</button>` : ''}
+              ${!ok ? `<button type="button" onclick="requestGeminiExplanationById('${q.cardId || ''}', 'sol-ai-${i}', '${escapeHtml(q.prompt)}')" class="px-2 py-1 rounded bg-violet-600 text-white font-bold">✨ AI Explain</button>` : ''}
+            </div>
+          </div>
+          <div>Your Pick: <strong class="${ok ? 'text-emerald-500' : 'text-rose-500'}">${chosen ? escapeHtml(chosen.text) : 'Skipped'}</strong> · Correct: <strong class="text-emerald-400">${rightOpt ? escapeHtml(rightOpt.text) : ''}</strong></div>
+          ${!ok ? getSmartTrapExplanation(card, chosen?.text || '', q.explanation) : (q.explanation ? `<div class="text-sub whitespace-pre-line">${escapeHtml(q.explanation)}</div>` : '')}
+          <div id="sol-ai-${i}" class="hidden p-2.5 rounded-xl panel-glass"></div></div>`;
+      }).join('');
+      saveToStorage(); renderAll();
+    }
+
+    function setStudyMode(m) {
+      stopAutoPlay(); stopSpeedCram();
+      activeMode = m; isFlipped = false; isHintVisible = false; isPeekActive = false;
+      clearInterval(matchTimerInterval); clearInterval(examTimerInterval);
+      document.getElementById('view-flashcards').classList.toggle('hidden', m !== 'flashcards');
+      document.getElementById('view-sheet').classList.toggle('hidden', m !== 'sheet');
+      document.getElementById('view-type').classList.toggle('hidden', m !== 'type');
+      document.getElementById('view-exam').classList.toggle('hidden', m !== 'exam');
+      document.getElementById('view-mistakes').classList.toggle('hidden', m !== 'mistakes');
+      document.getElementById('view-match').classList.toggle('hidden', m !== 'match');
+      renderAll();
+      if (m === 'type') loadNextTypeCard();
+      if (m === 'exam') showExamSetup();
+      if (m === 'mistakes') renderMistakeNotebook();
+      if (m === 'match') startMatchGame();
+    }
+    function updateModeTabs() {
+      ['flashcards', 'sheet', 'type', 'exam', 'mistakes', 'match'].forEach(m => {
+        const b = document.getElementById(`tab-${m}`); if (!b) return;
+        b.className = m === activeMode
+          ? 'py-2.5 px-2 rounded-2xl text-xs font-extrabold border btn-accent shadow-md transition'
+          : 'py-2.5 px-2 rounded-2xl text-xs font-extrabold border sub-glass text-sub hover:opacity-90 transition';
+      });
+    }
+
+    function startMatchGame() {
+      clearInterval(matchTimerInterval);
+      const pool = getCardsForFolder(activeFolderId, includeSubfolders), grid = document.getElementById('matchGrid');
+      if (pool.length < 2) { grid.innerHTML = `<div class="col-span-full text-center py-8 text-xs text-sub">Add at least 2 cards to play.</div>`; return; }
+      const sample = [...pool].sort(() => Math.random() - 0.5).slice(0, 6);
+      matchRemainingPairs = sample.length; matchSelectedTile = null;
+      const tiles = [];
+      sample.forEach(c => { tiles.push({ id: `t-${c.id}`, pairId: c.id, text: c.front, type: 'Word' }); tiles.push({ id: `d-${c.id}`, pairId: c.id, text: c.back.replace(/\[|\]/g, ''), type: 'Meaning' }); });
+      tiles.sort(() => Math.random() - 0.5);
+      grid.innerHTML = tiles.map(t => `<button type="button" data-pair="${t.pairId}" onclick="handleMatchTileClick(this)" class="match-tile p-3 rounded-2xl sub-glass text-xs font-bold text-main flex flex-col justify-between text-left min-h-[5.5rem]"><span class="text-[10px] uppercase text-indigo-400 font-extrabold">${t.type}</span><span class="line-clamp-3 my-auto">${escapeHtml(t.text)}</span></button>`).join('');
+      matchStartTime = performance.now();
+      matchTimerInterval = setInterval(() => { document.getElementById('matchTimer').textContent = ((performance.now() - matchStartTime) / 1000).toFixed(1) + 's'; }, 100);
+    }
+    function handleMatchTileClick(el) {
+      if (el.classList.contains('matched')) return;
+      if (!matchSelectedTile) { matchSelectedTile = el; el.classList.add('ring-2', 'ring-indigo-500'); return; }
+      if (matchSelectedTile === el) { el.classList.remove('ring-2', 'ring-indigo-500'); matchSelectedTile = null; return; }
+      if (matchSelectedTile.dataset.pair === el.dataset.pair) {
+        matchSelectedTile.classList.add('matched'); el.classList.add('matched'); matchSelectedTile = null; matchRemainingPairs--;
+        if (matchRemainingPairs === 0) { clearInterval(matchTimerInterval); document.getElementById('matchGrid').innerHTML = `<div class="col-span-full text-center py-8 space-y-2"><div class="text-2xl">🎉</div><div class="font-extrabold text-main">Board Cleared!</div><button type="button" onclick="startMatchGame()" class="px-4 py-2 rounded-xl btn-accent text-xs font-extrabold">Play Again</button></div>`; }
+      } else { const prev = matchSelectedTile; matchSelectedTile = null; prev.classList.remove('ring-2', 'ring-indigo-500'); }
+    }
+
+    function exportBackupJson() {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' }));
+      a.download = `RecallPro_v6_Backup.json`; a.click();
+    }
+    function importBackupJson(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = ev => { try { const imp = JSON.parse(ev.target.result); if (imp.folders && imp.cards) { appData = imp; activeFolderId = appData.folders[0]?.id; saveToStorage(); renderAll(); closeModal('backupModal'); alert('Restored!'); } } catch (err) { alert('Invalid file.'); } };
+      r.readAsText(f);
+    }
+    function resetToDefaultData() { if (confirm('Reset to sample data?')) { appData = JSON.parse(JSON.stringify(DEFAULT_DATA)); activeFolderId = appData.folders[0].id; saveToStorage(); renderAll(); closeModal('backupModal'); } }
+    function openModal(id) { if (id === 'aiModal') { document.getElementById('inputGeminiApiKey').value = localStorage.getItem(AI_KEY_STORAGE) || ''; document.getElementById('aiKeyTestStatus').classList.add('hidden'); } document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    document.getElementById('cardSearchInput').addEventListener('input', e => { searchQuery = e.target.value; currentCardIndex = 0; isHintVisible = false; renderAll(); });
+
+    let touchStartX = 0;
+    const touchArea = document.getElementById('flashcardTouchArea');
+    touchArea.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+    touchArea.addEventListener('touchend', e => {
+      const diff = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(diff) > 65) { if (diff < 0) nextCard(); else prevCard(); }
+    }, { passive: true });
+
+    applyTheme(currentTheme);
+    renderAll();
+  </script>
+</body>
+</html>
